@@ -1,4 +1,12 @@
-# Brisa Frontend
+# BrisaBoards Frontend
+
+Brisa is a web-based organizer app designed with a few main ideas:
+
+1. You should have access to tools designed for the task at hand, accomplished so far with Kanbans, Sheets, and Whiteboard.
+2. Cards are the important part, and building on a card should be easy. Any card, anywhere, can become a new board (Kanban, Sheet, Whiteboard).
+3. Labels (and tags) allow you to group ideas, and Models allow you to expand on them.
+
+Learn more at www.BrisaBoards.com.
 
 This is the BrisaBoards JavaScript frontend.
 
