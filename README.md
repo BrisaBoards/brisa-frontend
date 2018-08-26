@@ -20,7 +20,7 @@ You can also download this code to run it directly from your laptop. It is a sim
 
 There will be a link to the download once a copy has been created.
 
-While your browser will save the data so you can come back to it, it is _not_ recommended that you use this to store information you're not afraid of losing. If your browser profile becomes corrupted, you need to reinstall, or your laptop just stops working, you will lose your data!
+While your browser will save the data so you can come back to it, it is _not_ recommended that you use this to store information you would be afraid of losing. If your browser profile becomes corrupted, you need to reinstall, or your laptop just stops working, you will lose your data!
 
 ## For Developers
 
