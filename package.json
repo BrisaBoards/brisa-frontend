@@ -1,0 +1,16 @@
+{
+  "name": "Brisa-FE",
+  "description": "Brisa Front End",
+  "version": "0.1.0",
+  "private": true,
+  "author": "",
+  "homepage": "",
+  "dependencies": {
+    "vuedraggable": "^2.16.0"
+  },
+  "devDependencies": {
+    "poi": "^10.2.10",
+    "vue": "^2.5.17",
+    "vueify": "^9.4.1"
+  }
+}

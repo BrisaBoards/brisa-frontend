@@ -1,0 +1,18 @@
+{
+  "manifest_version": 2,
+  "name": "Brisa",
+  "version": "0.1",
+  "minimum_chrome_version": "23",
+  "icons": {
+    "16": "favicon.png",
+    "128": "favicon.png"
+  },
+  "app": {
+    "background": {
+      "scripts": ["chrome-main.js"]
+    }
+  },
+  "permissions": [
+    "fullscreen", "app.window.fullscreen"
+  ]
+}
