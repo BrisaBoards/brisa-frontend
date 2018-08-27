@@ -8,8 +8,6 @@ Brisa is a web-based organizer app designed with a few main ideas:
 
 Learn more at www.BrisaBoards.com.
 
-This is the BrisaBoards JavaScript frontend.
-
 ## For users
 
 You can download this code to run it directly from your laptop. It is a simple way to try out Brisa.
