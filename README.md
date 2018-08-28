@@ -6,11 +6,11 @@ Brisa is a web-based organizer app designed with a few main ideas:
 2. Cards are the important part, and building on a card should be easy. Any card, anywhere, can become a new board (Kanban, Sheet, Whiteboard).
 3. Labels (and tags) allow you to group ideas, and Models allow you to expand on them.
 
-Learn more at www.BrisaBoards.com.
+Learn more at http://BrisaBoards.com.
 
 ## For Users
 
-If you just want to try out BrisaBoards, you can just go to http://BrisaBoards.com/preview/. There is no signup process, and the data is stored in your browser, not on Brisa servers.
+If you just want to try out BrisaBoards, you can go to http://BrisaBoards.com/preview/. There is no signup process, and the data is stored in your browser, not on Brisa servers.
 
 If you would like to install a full Brisa server, check out For Installers below.
 
@@ -24,13 +24,15 @@ While your browser will save the data so you can come back to it, it is _not_ re
 
 Testing or modifying the frontend is _very_ easy. Here's the recommended way to start:
 
-1. Clone this repository.
+1. Clone this repository and change to the brisa-frontend directory.
 2. Run npm install. This will take a minute (poi, a zero-conf JS build tool, has quite a few dependencies).
 3. Run poi develop.
 
 After that, poi should tell you a server is running on http://localhost:4000. If you make changes, it is pretty good about displaying them automatically, but you may need to reload the page occasionally.
 
-Happy coding!
+The wiki is lacking, but it has a brief overview of the frontend structure, as well as a very poorly-formatted API intro.
+
+The backend is being converted from a hacked-together Ruby Rack app to a Ruby on Rails app. Expect the backend repository to be up shortly with details about how to run the two together.
 
 ## For Installers
 
