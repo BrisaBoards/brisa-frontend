@@ -1,6 +1,6 @@
 <template>
   <div class="card bg-transparent" style="position: relative;">
-    <div class="" :style="bg_color + 'border-radius: 3px; position: absolute; width: 100%; height: 100%; ' + opacity_str">
+    <div class="" :style="bg_color + 'xborder-radius: 3px; position: absolute; width: 100%; height: 100%; ' + opacity_str">
       <slot name="background"></slot>
     </div>
     <div style="position: relative;">

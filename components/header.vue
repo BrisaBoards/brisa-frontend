@@ -28,31 +28,30 @@
     </div>
 
     <div style="white-space: nowrap;">
-      <button @click="toggleFullScreen" class="btn xbtn-secondary btn-outline-secondary text-lightx btn-round-sm" style="padding-left: 12px; padding-right: 12px;">
+      <button @click="toggleFullScreen" class="btn xbtn-secondary btn-outline-primary text-lightx btn-round-sm" style="padding-left: 12px; padding-right: 12px;">
         <i class="fa fa-arrows-alt"></i>
       </button>
-      <button @click="$emit('toggle_settings')" class="btn xbtn-secondary btn-outline-secondary text-lightx btn-round-sm" style="padding-left: 12px; padding-right: 12px;">
+      <button @click="$emit('toggle_settings')" class="btn xbtn-secondary btn-outline-primary text-lightx btn-round-sm" style="padding-left: 12px; padding-right: 12px;">
         <i class="fa fa-ellipsis-v"></i>
       </button>
       &nbsp;
       <slot name="right_bar"></slot>
 
-      <button class="btn btn-round-sm btn-outline-secondary">
-        {{Brisa.user.name}} &nbsp;<i class="fa fa-user"></i>
+      <button class="btn btn-round-sm btn-outline-primary text-lightx">
+        {{Brisa.user.alias}} &nbsp;<i class="fa fa-user"></i>
       </button>
     </div>
   </div>
 
-    <div v-if="show_first_run" class="clearfix alert alert-success">
+    <div v-if="Brisa.brisa_first_run" class="clearfix alert alert-success">
       <div class="float-right">
         <button @click="LoadDemoData" class="btn btn-primary btn-lg">Yes!</button>
-        <button @click="show_first_run = false;" class="btn btn-warning btn-lg">No, thanks.</button>
+        <button @click="Brisa.brisa_first_run = false;" class="btn btn-warning btn-lg">No, thanks.</button>
       </div>
-      <strong>
         <h3>Say Hello To Brisa!</h3>
-        Hi! It looks like this is your first time using the Brisa Organizer.
-        Would you like to import the tutorial cards to help you get started?
-      </strong>
+        <p>Hi! It looks like this is your first time using Brisa Boards.
+        Would you like to import the tutorial cards to help you get started?</p>
+        <p>At any time, you can clear your data by going to Account Reset in the settings in the upper right.</p>
     </div>
 
   </div>
@@ -61,13 +60,12 @@
 <script>
   import Vue from 'vue'
   export default {
-    props: ['Brisa'],
     data: function() {
-      return {view: Brisa.current_view, show_first_run: this.Brisa.brisa_first_run};
+      return {view: Brisa.current_view, Brisa: Brisa};
     },
     methods: {
       LoadDemoData: function() {
-        this.show_first_run = false;
+        Brisa.brisa_first_run = false;
         var s = document.createElement('script');
         s.src = './demo-data.js';
         document.body.appendChild(s);

@@ -9,7 +9,7 @@
         <div class="d-flex" style="cursor: pointer;">
           <slot name="title">
             <div class="flex-grow-1 noselect" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis">
-              <span style="font-size: 115%; font-weight: 450;" class="card-title text-info">{{entry.data.title}}</span>
+              <span style="font-size: 115%;" class="card-title text-info">{{entry.data.title}}</span>
               &nbsp; {{entry.description()}}
             </div>
           </slot>

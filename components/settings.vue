@@ -48,16 +48,14 @@
     },
   });
 </script>
-
-
 <template>
   <div class="col-12">
     
     <br/>
     <brisa-card style="width: 100%;">
-      <div class="card-body" style="padding: 10px;">
+      <div class="card-body m-3" style="padding: 10px;">
         <div>
-          <button @click="$emit('close')" class="float-right btn btn-sm btn-primary">Close</button>
+          <button @click="$emit('close')" class="float-right btn btn-lg btn-primary">Close</button>
         <h4 class="card-title">Settings</h4>
         </div>
         <div class="nav nav-tabs">

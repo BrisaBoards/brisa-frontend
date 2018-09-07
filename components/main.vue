@@ -59,7 +59,7 @@
         return "height: " + new_ht + 'px';
       },
       background: function() {
-        return this.Brisa.bg_style();
+        return Brisa.bg_style();
       },
     },
     watch: {
@@ -68,10 +68,10 @@
       },
     },
     mounted: function() {
-      Brisa.settings.main_top = this.$refs.main_win.offsetTop;
+      //Brisa.settings.main_top = this.$refs.main_win.offsetTop;
     },
     created: function() {
-      this.Brisa.AddView('Dashboard', 'brisa-dashboard', {tags: [], classes: []}, null, []);
+      //this.Brisa.AddView('Dashboard', 'brisa-dashboard', {tags: [], classes: []}, null, []);
     },
   };
 </script>
@@ -82,7 +82,7 @@
     </transition>
 
     <div style="height: 100%; display: flex; flex: 1; align-items: stretch; flex-direction: column">
-    <brisa-header :Brisa="Brisa" ref="header" @toggle_settings="show_settings = !show_settings">
+    <brisa-header v-show="Brisa.user.logged_in" :Brisa="Brisa" ref="header" @toggle_settings="show_settings = !show_settings">
       <template slot="left_bar">
         <div :key="Brisa.current_view ? Brisa.current_view.title : ''" class="dropdown xfloat-left">
           <button @click="InitTags(true)" class="btn btn-sm btn-primary btn-dropdown btn-round-sm" style="opacity: 0.95;" type="button" id="addEntryDrop" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -113,22 +113,24 @@
     </brisa-header>
 
     <transition name="fade">
-      <div v-if="show_settings" class="container-fluid" :style="height + '; background-color: rgba(50,50,50,0.75); z-index: 2000; position: absolute;'">
+      <div v-if="show_settings" class="container-fluid" :style="height + '; background-color: rgba(50,50,50,0.5); z-index: 2000; top:0; bottom: 0;position: absolute;'">
         <div class="row" style="padding-top: 25px; padding-bottom: 25px;">
           <brisa-settings @close="show_settings=false"></brisa-settings>
         </div>
       </div>
     </transition>
     
-    <div v-show="false" ref="main_win" style="border: 1px solid red; flex-grow: 1;">
-    </div>
-      <transition name="fade-fast" mode="out-in">
+    <transition v-if="Brisa.user.logged_in" name="fade-fast" mode="out-in">
       <keep-alive>
       <component :key="view.unique_id"  style="flex-grow: 1;" :is="view.component"
           :Brisa="Brisa" :view="view" v-if="view && view.component">
       </component>
       </keep-alive>
-      </transition>
+    </transition>
+
+    <transition name="fade">
+    <brisa-login v-if="!Brisa.user.logged_in"></brisa-login>
+    </transition>
 
   </div>
   </div>

@@ -13,7 +13,7 @@
             <span class="fa fa-2x fa-caret-down"></span>
           </div>
           <slot name="title">
-            <h5 class="card-title text-info noselect">{{entry.data.title}}</h5>
+            <div class="card-title text-info noselect" style="font-size: 120%;" >{{entry.data.title}}</div>
           </slot>
         </div>
       </brisa-popup>

@@ -3,6 +3,7 @@ var BrisaIDB = function(db) {
   this.dbP = idb.open(db, 1, function(upgradeDb) {
     switch (upgradeDb.oldVersion) {
       case 0:
+        console.log("First run", Brisa);
         Brisa.brisa_first_run = true;
         upgradeDb.createObjectStore('entries', {keyPath: 'id', autoIncrement: true});
         upgradeDb.createObjectStore('models', {keyPath: 'id', autoIncrement: true});
@@ -99,21 +100,25 @@ BrisaIDB.prototype.dispatch = function(action, args) {
   return promise;
 };
 
-BrisaIDB.action('Model.all', 'models', 'iter', function(obj) { return true });
-BrisaIDB.action('Model.create', 'models', 'create', function(obj) {
+BrisaIDB.action('User:status', '', 'custom', function(act, args, resolve, reject) {
+  resolve({data: {logged_in: true, user_id: 1, alias: 'Preview', email: 'Preview'}});
+});
+
+BrisaIDB.action('Model:all', 'models', 'iter', function(obj) { return true });
+BrisaIDB.action('Model:create', 'models', 'create', function(obj) {
   if (obj.data.config == undefined) obj.data.config = {};
   obj.data.user_id = 1;
   return obj.data;
 });
-BrisaIDB.action('Model.update', 'models', 'update', function(args) {
+BrisaIDB.action('Model:update', 'models', 'update', function(args) {
   return args.data;
 });
 
-BrisaIDB.action('UserSetting.all', 'user_settings', 'iter', function(obj) { return true });
-BrisaIDB.action('UserSetting.update', 'user_settings', 'update', function(obj) { return obj.data});
-BrisaIDB.action('UserSetting.create', 'user_settings', 'create', function(obj) { return obj });
+BrisaIDB.action('UserSetting:all', 'user_settings', 'iter', function(obj) { return true });
+BrisaIDB.action('UserSetting:update', 'user_settings', 'update', function(obj) { return obj.data});
+BrisaIDB.action('UserSetting:create', 'user_settings', 'create', function(obj) { return obj });
 
-BrisaIDB.action('Entry.add_tags', 'entries', 'custom', function(act, args, resolve, reject) {
+BrisaIDB.action('Entry:add_tags', 'entries', 'custom', function(act, args, resolve, reject) {
   var tx, store;
   this.dbP.then(function(db) {
     tx = db.transaction(act.store, 'readwrite');
@@ -131,7 +136,7 @@ BrisaIDB.action('Entry.add_tags', 'entries', 'custom', function(act, args, resol
   });
 });
 
-BrisaIDB.action('Entry.remove_tags', 'entries', 'custom', function(act, args, resolve, reject) {
+BrisaIDB.action('Entry:remove_tags', 'entries', 'custom', function(act, args, resolve, reject) {
   var tx, store;
   this.dbP.then(function(db) {
     tx = db.transaction(act.store, 'readwrite');
@@ -152,7 +157,7 @@ BrisaIDB.action('Entry.remove_tags', 'entries', 'custom', function(act, args, re
   });
 });
 
-BrisaIDB.action('Entry.edit_class', 'entries', 'custom', function(act, args, resolve, reject) {
+BrisaIDB.action('Entry:edit_class', 'entries', 'custom', function(act, args, resolve, reject) {
   var tx, store;
   this.dbP.then(function(db) {
     tx = db.transaction(act.store, 'readwrite');
@@ -161,23 +166,25 @@ BrisaIDB.action('Entry.edit_class', 'entries', 'custom', function(act, args, res
   }).then(function(r) {
     if (r.classes == undefined) r.classes = [];
     if (r.classes.indexOf(args.class_name) == -1) r.classes.push(args.class_name);
-    r.metadata[args.class_name] = args.cfg;
+    r.metadata[args.class_name] = (args.cfg == undefined) ? {} : args.cfg;
     store.put(r).then(function() {resolve({data:r})} );
   });
 });
 
-BrisaIDB.action('Entry.create', 'entries', 'create', function(obj) {
+BrisaIDB.action('Entry:create', 'entries', 'create', function(obj) {
   if (obj.data.metadata == undefined) obj.data.metadata = {};
-  obj.data.user_id = 1;
+  obj.data.owner_id = 1;
+  obj.data.creator_id = 1;
+  obj.data.created_at = new Date();
   return obj.data;
 });
-BrisaIDB.action('Entry.update', 'entries', 'update', function(args) {
+BrisaIDB.action('Entry:update', 'entries', 'update', function(args) {
   return args.data;
 });
-BrisaIDB.action('Entry.destroy', 'entries', 'destroy', function(args) {
+BrisaIDB.action('Entry:destroy', 'entries', 'destroy', function(args) {
   return args.id;
 });
-BrisaIDB.action('Entry.search', 'entries', 'iter', function(obj, args) {
+BrisaIDB.action('Entry:search', 'entries', 'iter', function(obj, args) {
   var tags = args.tags, classes = args.classes;
   if (tags == null) {
   } else if (tags.length == 0) {

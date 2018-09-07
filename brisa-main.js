@@ -14,10 +14,30 @@ export default function() {
   //Vue.component('brisa-main', brisa_main_component);
   Brisa.results = [];
   Brisa.user = {
+    logged_in: null,
     uid: 1,
-    name: "Demo",
+    name: "",
     real_id: 1,
     shares: [],
+  };
+  Brisa.Login = function(user) {
+    localStorage.setItem('brisa-token', user.auth_token);
+    BrisaAPI._include.auth_token = user.auth_token;
+    BrisaAPI.Model.all().then(function(r) {
+      Vue.set(Brisa, 'models', r);
+    }.bind(this));
+    BrisaAPI.UserSetting.all().then(function(r) {
+      for (var i in r) {
+        var s = r[i];
+        Brisa.settings[s.name()] = s;
+      }
+      Brisa.Theme().then(function(t) {
+        Vue.set(Brisa, 'theme', t);
+      }.bind(this));
+      Brisa.user = user;
+    }.bind(this));
+    if (Brisa.views.length == 0)
+      Brisa.AddView('Dashboard', 'brisa-dashboard', {tags: [], classes: []}, null, []);
   };
   Brisa.models = [];
   Brisa.settings = {main_top: 48, header_height: 48, height: window.innerHeight};
@@ -54,7 +74,7 @@ export default function() {
   Brisa.OpenView = function(parent, uitype) {
     var md = parent.data.metadata;
     var cls_md = md[uitype.cls];
-    BrisaAPI.Entry.search(null, cls_md.tags, cls_md.classes).then(function(r) {
+    BrisaAPI.Entry.search(cls_md.tags, cls_md.classes).then(function(r) {
       var view = this.AddView(parent.title(), uitype.cmp,
           {tags: cls_md.tags || [], classes: cls_md.classes || []},
           parent, r);
@@ -62,7 +82,7 @@ export default function() {
   };
   Brisa.OpenKanban = function(parent) {
     var md = parent.data.metadata;
-    BrisaAPI.Entry.search(null, md._kanban.tags, md._kanban.classes).then(function(r) {
+    BrisaAPI.Entry.search(md._kanban.tags, md._kanban.classes).then(function(r) {
       var view = this.AddView(parent.title(), 'brisa-kanban',
           {tags: md._kanban.tags || [], classes: md._kanban.classes || []},
           parent, r);
@@ -70,7 +90,7 @@ export default function() {
   };
   Brisa.OpenWhiteboard = function(parent) {
     var md = parent.data.metadata;
-    BrisaAPI.Entry.search(null, md._whiteboard.tags, md._whiteboard.classes).then(function(r) {
+    BrisaAPI.Entry.search(md._whiteboard.tags, md._whiteboard.classes).then(function(r) {
       var view = this.AddView(parent.title(), 'brisa-whiteboard',
           {tags: md._whiteboard.tags || [], classes: md._whiteboard.classes || []},
           parent, r);
@@ -78,7 +98,7 @@ export default function() {
   };
   Brisa.OpenSheet = function(parent) {
     var md = parent.data.metadata;
-    BrisaAPI.Entry.search(null, md._sheet.tags, md._sheet.classes).then(function(r) {
+    BrisaAPI.Entry.search(md._sheet.tags, md._sheet.classes).then(function(r) {
       var view = this.AddView(parent.title(), 'brisa-sheet',
           {tags: md._sheet.tags || [], classes: md._sheet.classes || []},
           parent, r);
@@ -151,7 +171,8 @@ export default function() {
     ]
   },
   Brisa.bg_style = function() {
-    var setting = this.theme ? this.theme.data.setting : {bg_class: 'primary'};
+    var setting = this.theme && this.theme.data ? this.theme.data.setting : {bg_class: 'primary'};
+    if (!setting) setting = {bg_class: 'primary'};
     if (setting.bg_class) {
       return {style: '', classes: 'bg-' + setting.bg_class};
     } else if (setting.color) {
@@ -182,29 +203,40 @@ export default function() {
       if (Brisa.models[i].unique_id() == m) return Brisa.models[i];
     }
   };
-  
 
+  // Token refresh: 30m * 60s * 1000ms
+  Brisa.token_refresh_interval = 30 * 60 * 1000;
   
   $(document).ready(function() {
-    BrisaAPI.Model.all().then(function(r) {
-      Vue.set(Brisa, 'models', r);
-        
-      BrisaAPI.UserSetting.all().then(function(r) {
-        for (var i in r) {
-          var s = r[i];
-          Brisa.settings[s.name()] = s;
-        }
-        Brisa.Theme().then(function(t) {
-          Brisa.theme = t;
-          Brisa.app = new Vue({el: '#brisa-container',
-            components: {'brisa-main': brisa_main_component},
-            data: {Brisa: Brisa, view: Brisa.current_view},
-            render: function(h) { return h(brisa_main_component, { props: {Brisa: Brisa, view: Brisa.current_view} }) },
-          });
-        }.bind(this));
-      }.bind(this));
-    }.bind(this));
+    BrisaAPI._include.auth_token = localStorage.getItem('brisa-token');
+    Brisa.theme = {data: {setting: { image: 'backgrounds/breeze.jpg'}}};
+    Brisa.models = [];
+    Brisa.settings = {};
+    Brisa.app = new Vue({el: '#brisa-container',
+      components: {'brisa-main': brisa_main_component},
+      data: {Brisa: Brisa, view: Brisa.current_view},
+      render: function(h) { return h(brisa_main_component, { props: {Brisa: Brisa, view: Brisa.current_view} }) },
+    });
 
+    BrisaAPI.User.status().then(function(r) {
+      if (r.data.logged_in) {
+        Brisa.Login(r.data);
+      } else {
+        Brisa.user = r.data;
+      }
+    });
+
+    setInterval(function() {
+      if (!Brisa.user.logged_in) return;
+      BrisaAPI.User.status(true).then(function(r) {
+        if (!r.data.logged_in) {
+          Brisa.user = r.data;
+        } else {
+          BrisaAPI._include.auth_token = r.data.auth_token;
+          localStorage.setItem('brisa-token', r.data.auth_token);
+        }
+      });
+    }, Brisa.token_refresh_interval);
   });
   return Brisa;
 }

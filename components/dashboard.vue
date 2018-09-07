@@ -82,7 +82,7 @@
       UpdateSearch: function() {
         this.view.ctx.tags = this.search.tags || [];
         this.view.ctx.classes = this.search.classes || [];
-        BrisaAPI.Entry.search(null, this.search.tags, this.search.classes).then(function(r) {
+        BrisaAPI.Entry.search(this.search.tags, this.search.classes).then(function(r) {
           this.view.entries = r;
         }.bind(this));        
       },
