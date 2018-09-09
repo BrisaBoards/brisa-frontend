@@ -132,6 +132,7 @@ export default function() {
     var new_h = ref.scrollHeight > max ? max : ref.scrollHeight;
     new_h = new_h < min ? min : new_h;
     ref.style.height = (new_h + 0) + "px";
+    ref.style['overflow-y'] = new_h >= max ? 'scroll' : 'hidden';
   };
 
   Brisa.uid_chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789".split('');
