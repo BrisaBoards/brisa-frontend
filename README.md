@@ -6,11 +6,11 @@ Brisa is a web-based organizer app designed with a few main ideas:
 2. Cards are the important part, and building on a card should be easy. Any card, anywhere, can become a new board (Kanban, Sheet, Whiteboard).
 3. Labels (and tags) allow you to group ideas, and Models allow you to expand on them.
 
-Learn more at http://BrisaBoards.com.
+Learn more at https://BrisaBoards.com.
 
 ## For Users
 
-If you just want to try out BrisaBoards, you can go to http://BrisaBoards.com/preview/. There is no signup process, and the data is stored in your browser, not on Brisa servers.
+If you just want to try out BrisaBoards, you can go to https://BrisaBoards.com/preview/. There is no signup process, and the data is stored in your browser, not on Brisa servers.
 
 If you would like to install a full Brisa server, check out For Installers below.
 
