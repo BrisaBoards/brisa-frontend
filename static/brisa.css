@@ -149,6 +149,7 @@ body:fullscreen {
   .sheet-table thead th {
     border: 1px solid #aaa;
     padding: 3px;
+    font-weight: normal;
   }
   .sheet-table td {
     border: 1px solid #ccc;

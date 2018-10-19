@@ -95,7 +95,7 @@
           this.$nextTick(function() {this.$refs['add-input-' + group][0].focus()}.bind(this));
       },
       AddCard: function(group) {
-        var copts = {title: this.show_add[group].title, tags: this.view.ctx.tags, classes: this.view.ctx.classes};
+        var copts = {title: this.show_add[group].title, group_id: this.view.group_id, tags: this.view.ctx.tags, classes: this.view.ctx.classes};
         copts.metadata = {_kanbans: { }};
         copts.metadata._kanbans[this.entry.data.id] = {group: group};
         BrisaAPI.Entry.create(copts).then(function(r) {
@@ -103,6 +103,7 @@
           this.entry_dict[r.data.id] = r;
           this.view.entries.push(r);
           this.entry.metadata()._kanban.sorted[group].push(r.data.id);
+          this.$forceUpdate();
         }.bind(this));
       },
       sorted_group: function(group) {

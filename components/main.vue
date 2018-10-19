@@ -1,8 +1,10 @@
 <script>
+  import Sidebar from './sidebar.vue';
   export default {
     props: [
       'Brisa', 'view'
     ],
+    components: {'Sidebar': Sidebar},
     data: function() {
       return {
         entries: [],
@@ -12,6 +14,7 @@
         show_links: null,
         new_entry_title: '', new_entry_desc: '', new_entry_tags: '',
         showPopper: {},
+        show_menu: false,
         show_search: false,
         sel_label: 0,
         sel_model: -1,
@@ -22,6 +25,10 @@
       };
     },
     methods: {
+      OpenDash: function(group_id) {
+        Brisa.AddView('Dashboard', 'brisa-dashboard', {tags: [], classes: []}, null, [], group_id);
+        this.show_menu = false;
+      },
       InitTags: function(focus) {
         if (this.view) {
           this.new_entry_tags = this.view.ctx.tags.join(", ");
@@ -85,26 +92,11 @@
     <brisa-header v-show="Brisa.user.logged_in" :Brisa="Brisa" ref="header" @toggle_settings="show_settings = !show_settings">
       <template slot="left_bar">
         <div :key="Brisa.current_view ? Brisa.current_view.title : ''" class="dropdown xfloat-left">
-          <button @click="InitTags(true)" class="btn btn-sm btn-primary btn-dropdown btn-round-sm" style="opacity: 0.95;" type="button" id="addEntryDrop" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-            <i class="fas fa-plus" style="font-size: 1.5em"></i>
-          </button>
-          <div class="dropdown-menu" @click.stop="" style="min-width: 350px; border-radius: 10px;" aria-labelledby="addEntryDrop">
-            <div class="p-4">
-              <h5>New Entry</h5>
-              <div class="form-group">
-                <input ref="title" v-model="new_entry_title" type="email" class="form-control" id="new-entry-title" placeholder="Title">
-              </div>
-              <div class="form-group">
-                <textarea v-model="new_entry_desc" type="email" class="form-control" id="new-entry-desc" placeholder="Description" rows="4"></textarea>
-              </div>
-              <div class="form-group">
-                <input class="form-control" v-model="new_entry_tags" placeholder="Tags (eg Tag1, Tag 2, Tag3)">
-              </div>
-              <div class="form-group">
-                <button @click.prevent="addEntry()" class="btn btn-info" type="submit">Add</button>
-              </div>
-            </div>
-          </div>
+          <a @click.prevent="show_menu = true" href="#" class="text-light p-1" style="text-decoration: none; font-size: 150%;">
+            <i class="fa fa-bars"></i>&nbsp; {{(Brisa.current_view || {}).group_name}}
+            -
+            {{(Brisa.current_view || {}).title}}
+          </a>
         </div>
       </template>
       
@@ -120,6 +112,10 @@
       </div>
     </transition>
     
+    <transition name="fade">
+      <Sidebar v-if="show_menu" @toggle-menu="show_menu = false"></Sidebar>
+    </transition>
+
     <transition v-if="Brisa.user.logged_in" name="fade-fast" mode="out-in">
       <keep-alive>
       <component :key="view.unique_id"  style="flex-grow: 1;" :is="view.component"

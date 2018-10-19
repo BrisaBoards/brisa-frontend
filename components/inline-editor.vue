@@ -16,12 +16,12 @@
       </component>
     </div>
     <component style="height: 100%; min-height: 50px;" :is="wrapper || 'div'" v-if="do_edit" class="d-flex">
-      <div class="flex-grow-1" style="height: 100%;">
+      <div class="flex-grow-1" style="height: 100%; position: relative;">
       <input ref="editor" v-if="val_type == 'int' || val_type == 'string'" v-model="edit_val"
           @keyup="checkKeyCode" style="height: 100%;" class="form-control xform-control-sm bg-light">
       <div v-else-if="val_type == 'text' || val_type=='markdown'">
         <textarea ref="editor" @keyup.esc="CancelEdit()" @input="resizeTextarea"
-            class="form-control bg-light" style="overflow-y: hidden" v-model="edit_val" rows="3"></textarea>
+            class="form-control bg-light" v-model="edit_val" rows="3"></textarea>
       </div>
       <div v-else-if="val_type == 'enum'">
         <select v-model="edit_val" @change="DoneEditing()" ref="editor" class="form-control bg-light">
@@ -34,8 +34,8 @@
         <small>Need handler for {{val_type}}</small>
       </div>
       </div>
-      <div>
-        <button @click="DoneEditing" style="width: 100%; margin-bottom: 10px;" class="btn btn-sm btn-primary"><i class="fa fa-check"></i></button>
+      <div style="width: 30px;">
+        <button @click="DoneEditing" style="width: 100%; margin-bottom: 0px;" class="btn btn-sm btn-primary"><i class="fa fa-check"></i></button>
         <br/>
         <button @click="CancelEdit" style="width: 100%;" class="btn btn-sm btn-warning"><i class="fa fa-times"></i></button>
       </div>

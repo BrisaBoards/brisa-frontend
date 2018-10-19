@@ -2,8 +2,13 @@
   <div>
     <h4 class="card-title">Models</h4>
   
+    <div class="m-2">
+      <button @click="sel_group = group.data.id" :class="'btn btn-sm m-1 btn-' + (sel_group == group.data.id ? 'primary' : 'secondary')"
+        v-for="group in Brisa.groups">{{group.data.name}}</button>
+    </div>
+
     <div style="padding: 5px">
-    <button @click="selectModel(idx)" class="btn btn-sm btn-info" v-for="(model, idx) in models" style="margin-right: 10px;">
+    <button @click="selectModel(idx)" class="btn btn-sm btn-info" v-for="(model, idx) in Brisa.group_models[sel_group]" style="margin-right: 10px;">
       {{model.title()}}
     </button>
     </div>
@@ -61,7 +66,7 @@
     ],
     data: function() {
       return {
-        models: Brisa.models,
+        sel_group: null,
         sel_model: null,
         new_model_title: '',
         new_field_title: '', new_field_type: null,
@@ -70,12 +75,13 @@
     },
     methods: {
       selectModel: function(idx) {
-        var m = this.models[idx];
+        var m = Brisa.group_models[this.sel_group][idx];
         this.sel_model = this.sel_model == m ? null : m;
       },
       AddModel: function() {
-        BrisaAPI.Model.create({unique_id: Brisa.unique_id(8, this.new_model_title), title: this.new_model_title, config: {fields:[]}}).then(function(r) {
-          this.models.push(r);
+        BrisaAPI.Model.create({group_id: this.sel_group, unique_id: Brisa.unique_id(8, this.new_model_title), title: this.new_model_title, config: {fields:[]}}).then(function(r) {
+          Brisa.group_models[this.sel_group].push(r);
+          Brisa.group_model_map[this.sel_group][r.unique_id()] = r;
           this.new_model_title = '';
         }.bind(this));
       },

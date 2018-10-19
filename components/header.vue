@@ -5,8 +5,8 @@
       <slot name="left_bar"></slot>
     </div>
     
-    
-    <div class="xfloat-left flex-grow-1 text-light" style="padding: 5px; xwhite-space: nowrap; xoverflow: hidden;">
+    <div class="flex-grow-1"></div>
+    <div v-if="false" class="xfloat-left flex-grow-1 text-light" style="padding: 5px; xwhite-space: nowrap; xoverflow: hidden;">
       <div :key="l_view.id + '-' + idx" class="text-light" v-for="(l_view, idx) in Brisa.views" style="display: inline-block">
         &nbsp;&nbsp;<span class="text-info" v-if="idx != 0">/</span>&nbsp;&nbsp;
 
@@ -28,18 +28,21 @@
     </div>
 
     <div style="white-space: nowrap;">
-      <button @click="toggleFullScreen" class="btn xbtn-secondary btn-outline-primary text-lightx btn-round-sm" style="padding-left: 12px; padding-right: 12px;">
+      <button v-if="false" @click="toggleFullScreen" class="btn btn-outline-primary text-light btn-round-sm" style="padding-left: 12px; padding-right: 12px;">
         <i class="fa fa-arrows-alt"></i>
       </button>
-      <button @click="$emit('toggle_settings')" class="btn xbtn-secondary btn-outline-primary text-lightx btn-round-sm" style="padding-left: 12px; padding-right: 12px;">
-        <i class="fa fa-ellipsis-v"></i>
+      <button @click="$emit('toggle_settings')" class="btn btn-outline-primary text-light btn-round-sm" style="padding-left: 12px; padding-right: 12px;">
+        Settings &nbsp;<i class="fa fa-ellipsis-v"></i>
       </button>
       &nbsp;
       <slot name="right_bar"></slot>
 
-      <button class="btn btn-round-sm btn-outline-primary text-lightx">
+      <button v-if="false" class="btn btn-round-sm btn-outline-primary text-light">
         {{Brisa.user.alias}} &nbsp;<i class="fa fa-user"></i>
       </button>
+      <div v-if="false" class="rounded-circle bg-light" style="display: inline-block; height: 25px; width: 25px;">
+        <img src="/favicon.ico" style="height: 100%; width: auto;">
+      </div>
     </div>
   </div>
 

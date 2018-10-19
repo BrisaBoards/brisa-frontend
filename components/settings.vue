@@ -73,9 +73,6 @@
           <li class="nav-item">
             <a @click.prevent="sel_tab = 'models'" :class="'nav-link' + (sel_tab == 'models' ? ' active' : '')" href="#">Models</a>
           </li>
-          <li class="nav-item">
-            <a @click.prevent="sel_tab = 'accounts'" :class="'nav-link' + (sel_tab == 'accounts' ? ' active' : '')" href="#">Accounts</a>
-          </li>
           <li class="nav-item" v-if="BrisaAPI._brisa_idb">
             <a @click.prevent="sel_tab = 'del_data'" :class="'nav-link' + (sel_tab == 'del_data' ? ' active' : '')" href="#">Account Reset</a>
           </li>
@@ -135,14 +132,6 @@
         </div>
         <div v-if="sel_tab == 'models'">
           <brisa-models></brisa-models>
-        </div>
-        <div v-if="sel_tab == 'accounts'">
-          <div v-if="Brisa.user.uid != Brisa.user.real_id">
-            <a href="/users/become/self?r=/Brisa/dashboard">Back To Main Account</a>
-          </div>
-          <div v-for="user in Brisa.user.shares">
-            <a :href="'/users/become/' + user[0] + '?r=/Brisa/dashboard'">Change to: {{user[1]}}</a>
-          </div>
         </div>
         <div v-if="sel_tab == 'del_data'">
           <h4 class="card-title">Delete My Data</h4>

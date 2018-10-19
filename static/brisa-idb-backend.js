@@ -1,13 +1,14 @@
 var BrisaIDB = function(db) {
   this.db_name = db;
-  this.dbP = idb.open(db, 1, function(upgradeDb) {
+  this.dbP = idb.open(db, 2, function(upgradeDb) {
     switch (upgradeDb.oldVersion) {
       case 0:
-        console.log("First run", Brisa);
         Brisa.brisa_first_run = true;
         upgradeDb.createObjectStore('entries', {keyPath: 'id', autoIncrement: true});
         upgradeDb.createObjectStore('models', {keyPath: 'id', autoIncrement: true});
         upgradeDb.createObjectStore('user_settings', {keyPath: 'id', autoIncrement: true});
+      case 1:
+        upgradeDb.createObjectStore('groups', {keyPath: 'id', autoIncrement: true});
     }
   }.bind(this));
   return this;
@@ -91,6 +92,7 @@ BrisaIDB.prototype.dispatch = function(action, args) {
   console.log(action, args, act);
   if (!act)
     return new Promise(function(resolve, reject) {
+      console.log("IDB Action Not Found", action, args);
       reject({error: 'Action ' + action + ' not found.'});
     });
 
@@ -104,10 +106,21 @@ BrisaIDB.action('User:status', '', 'custom', function(act, args, resolve, reject
   resolve({data: {logged_in: true, user_id: 1, alias: 'Preview', email: 'Preview'}});
 });
 
-BrisaIDB.action('Model:all', 'models', 'iter', function(obj) { return true });
+BrisaIDB.action('User:groups', 'groups', 'iter', function(obj) { return true });
+
+BrisaIDB.action('Group:create', 'groups', 'create', function(obj) {
+  return {name: obj.name, shares: [], settings: {}};
+});
+
+BrisaIDB.action('Model:all', 'models', 'iter', function(obj, args) {
+  if (obj.group_id == args.group_id) return true;
+  return false;
+});
+
 BrisaIDB.action('Model:create', 'models', 'create', function(obj) {
   if (obj.data.config == undefined) obj.data.config = {};
   obj.data.user_id = 1;
+  if (!obj.data.group_id) obj.data.group_id = null;
   return obj.data;
 });
 BrisaIDB.action('Model:update', 'models', 'update', function(args) {
@@ -125,7 +138,6 @@ BrisaIDB.action('Entry:add_tags', 'entries', 'custom', function(act, args, resol
     store = tx.objectStore(act.store);
     return store.get(args.id);
   }).then(function(r) {
-    console.log("Add tag r", r);
     if (r.tags == undefined) r.tags = [];
     if (typeof args.tags == 'string')
       r.tags.push(args.tags);
@@ -143,7 +155,6 @@ BrisaIDB.action('Entry:remove_tags', 'entries', 'custom', function(act, args, re
     store = tx.objectStore(act.store);
     return store.get(args.id);
   }).then(function(r) {
-    console.log("Remove tags r", r);
     if (r.tags == undefined) r.tags = [];
     if (typeof args.tags == 'string')
       args.tags = [args.tags];
@@ -173,6 +184,7 @@ BrisaIDB.action('Entry:edit_class', 'entries', 'custom', function(act, args, res
 
 BrisaIDB.action('Entry:create', 'entries', 'create', function(obj) {
   if (obj.data.metadata == undefined) obj.data.metadata = {};
+  if (!obj.data.group_id) obj.data.group_id = null;
   obj.data.owner_id = 1;
   obj.data.creator_id = 1;
   obj.data.created_at = new Date();
@@ -186,6 +198,7 @@ BrisaIDB.action('Entry:destroy', 'entries', 'destroy', function(args) {
 });
 BrisaIDB.action('Entry:search', 'entries', 'iter', function(obj, args) {
   var tags = args.tags, classes = args.classes;
+  if (obj.group_id != args.group_id) return false;
   if (tags == null) {
   } else if (tags.length == 0) {
     if (obj.tags.length != 0) return false;

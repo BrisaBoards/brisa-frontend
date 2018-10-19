@@ -1,27 +1,27 @@
 <template>
   <div ref="main" class="" class="d-flex xjustify-content-center"
-      :style="'height: 100%; xbackground-color: rgba(0,0,0,0.2); padding: 0px; width: 100%; xoverflow: scroll; overflow-x: scroll; position: relative;'">
+      :style="'height: 100%; padding: 0px; width: 100%; overflow-x: scroll; position: relative;'">
     <div style="padding-bottom: 2px;"></div>
 
-    <table class="table table-striped table-hover sheet-table" style="width: auto; background-color: rgba(255,255,255,0.93)">
+    <table class="table xtable-striped table-hover sheet-table" style="width: auto; background-color: rgba(255,255,255,0.93)">
       <thead class="xthead-light" style="font-weight: normal">
         <tr v-if="models.length > 0">
-          <th colspan="3"></th>
-          <th style="text-align: center;" :colspan="model_dict[model].config().fields.length" v-for="model in models">
+          <th colspan="3" style="border: 2px solid #d0d0d0;"></th>
+          <th style="text-align: center;border: 2px solid #d0d0d0;" :colspan="model_dict[model].config().fields.length" v-for="model in models">
             <div class="sheet-cell-cont" style="width: 200px;">{{model_dict[model].title()}}</div>
             
           </th>
         </tr>
         <tr>
         <th style="width: 50px;"></th>
-        <th style="width: 50px;">
+        <th style="width: 50px; border: 2px solid #d0d0d0;">
           <div class="sheet-cell-cont" style="width: 200px;">Title</div>
         </th>
-        <th style="width: 100px">
+        <th style="width: 100px; border: 2px solid #d0d0d0;">
           <div class="sheet-cell-cont" style="width: 200px;">Description</div>
         </th>
         <template v-for="(model,idx) in models">
-          <th v-for="(field,idx) in (model_dict[model].config() || {fields: []}).fields">
+          <th v-for="(field,idx) in (model_dict[model].config() || {fields: []}).fields" style="border: 2px solid #d0d0d0;" >
             <div class="sheet-cell-cont" style="width: 200px;">{{field.title}}</div>
           </th>
         </template>
@@ -62,7 +62,7 @@
                   {{entry_dict[entry].title()}}
                 </div>
                 <div class="">
-                  <button v-for="uit in Brisa.ui_types" @touchstart.stop @mousedown.stop @click="Brisa.OpenView(entry_dict[entry], uit)" v-if="entry_dict[entry].metadata()[uit.cls]" class="btn btn-round-xs btn-outline-primary mr-1 xtext-primary"><i :class="'fa ' + uit.icon"></i></button>
+                  <button v-for="uit in Brisa.ui_types" @touchstart.stop @mousedown.stop @click.stop="Brisa.OpenView(entry_dict[entry], uit)" v-if="entry_dict[entry].metadata()[uit.cls]" style="max-width: 40px; overflow: hidden" class="btn btn-round-xs btn-outline-primary mr-1 xtext-primary"><i :class="'fa ' + uit.icon"></i> {{uit.name}}</button>
                 </div>
               </div>
             </div>
@@ -94,9 +94,9 @@
         <tr slot="footer">
           <td></td>
           <td colspan="0">
-            <div class="text-primary" @click="new_entry = ''; add_entry = true" style="cursor: pointer; padding: 0px; width: 100%;">
+            <div class="text-primary" @click="OpenAdd" style="cursor: pointer; padding: 0px; width: 100%;">
               <div v-if="!add_entry" style="padding: 5px;"><i class="fa fa-plus"></i> Add</div>
-              <input class="form-control form-control-sm" autofocus="true" v-model="new_entry" v-else="add_entry" placeholder="New"
+              <input class="form-control form-control-sm" ref="new_entry" v-model="new_entry" v-else="add_entry" placeholder="New"
                 xstyle="padding: 5px;" @keydown.esc="add_entry=false" @keypress.enter="AddEntry">
             </div>
           </td>
@@ -170,8 +170,12 @@
           Vue.set(this.selected, v, true);
         }
       },
+      OpenAdd: function() {
+        this.add_entry = true;
+        this.$nextTick(function() { this.$refs.new_entry.focus() });
+      },
       AddEntry: function() {
-        var copts = {title: this.new_entry, tags: this.view.ctx.tags || [], classes: this.view.ctx.classes || []};
+        var copts = {title: this.new_entry, group_id: this.view.group_id, tags: this.view.ctx.tags || [], classes: this.view.ctx.classes || []};
         BrisaAPI.Entry.create(copts).then(function(r) {
           this.new_entry = '';
           this.view.entries.push(r);
@@ -193,7 +197,7 @@
       for (var i in md._sheet.classes) {
         var cls = md._sheet.classes[i];
         if (!cls.match(/^_/) && this.models.indexOf(cls) == -1) {
-          var model = Brisa.model(cls);
+          var model = Brisa.group_model_map[this.view.group_id][cls];
           if (model) {
             this.model_dict[cls] = model;
             this.models.push(cls);

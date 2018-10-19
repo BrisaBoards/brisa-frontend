@@ -18,11 +18,12 @@
         </div>
       </brisa-popup>
 
-      <div v-if="!hide_desc" class="card-bodyx text-muted entry-section" style="position: relative; height: 80px; cursor: pointer; overflow: hidden;'">
+      <div v-if="!hide_desc" class="card-bodyx text-muted entry-section" style="position: relative; height: 60px; cursor: pointer; overflow: hidden;'">
         <p class="" v-html="fmtText(entry.description())"></p>
       </div>
       <div>
-        <button v-for="uit in Brisa.ui_types" @mousedown.stop @touchstart.stop @click.stop="Brisa.OpenView(entry, uit)" v-if="entry.metadata()[uit.cls]" class="btn btn-round-xs btn-outline-primary mr-1"><i :class="'fa ' + uit.icon"></i></button>
+        <button style="margin: 2px;" v-for="uit in Brisa.ui_types" @mousedown.stop @touchstart.stop @click.stop="Brisa.OpenView(entry, uit)"
+            v-if="entry.metadata()[uit.cls]" class="btn btn-round-xs btn-outline-primary mr-1"><i :class="'fa ' + uit.icon"></i> {{uit.name}}</button>
       </div>
     </div>
   </brisa-card>

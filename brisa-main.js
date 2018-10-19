@@ -11,7 +11,6 @@ export default function() {
     console.log("Initialize IDB backend");
     BrisaAPI._brisa_idb = new BrisaIDB('organizer-demo');
   }
-  //Vue.component('brisa-main', brisa_main_component);
   Brisa.results = [];
   Brisa.user = {
     logged_in: null,
@@ -20,12 +19,25 @@ export default function() {
     real_id: 1,
     shares: [],
   };
+  Brisa.toggleFullScreen = function() {
+    if (document.webkitFullscreenElement) {
+      document.webkitExitFullscreen();
+    } else {
+      document.documentElement.webkitRequestFullScreen(Element.ALLOW_KEYBOARD_INPUT);
+    }
+  }
   Brisa.Login = function(user) {
     localStorage.setItem('brisa-token', user.auth_token);
     BrisaAPI._include.auth_token = user.auth_token;
-    BrisaAPI.Model.all().then(function(r) {
-      Vue.set(Brisa, 'models', r);
-    }.bind(this));
+    Brisa.LoadModels(null);
+    BrisaAPI.User.groups().then(function(r) {
+      Vue.set(Brisa, 'groups', [{data:{id: null, name: 'Personal'}}].concat(r));
+      for (let group of Brisa.groups) {
+        if (group.data.id != null) Brisa.LoadModels(group.data.id);
+      }
+    }).catch(function(r) {
+      Vue.set(Brisa, 'groups', [{data:{id: null, name: 'Personal'}}]);
+    });
     BrisaAPI.UserSetting.all().then(function(r) {
       for (var i in r) {
         var s = r[i];
@@ -39,10 +51,16 @@ export default function() {
     if (Brisa.views.length == 0)
       Brisa.AddView('Dashboard', 'brisa-dashboard', {tags: [], classes: []}, null, []);
   };
+
+  Brisa.CreateEntry = function(entry) {
+    return BrisaAPI.Entry.create(entry);
+  };
   Brisa.models = [];
   Brisa.settings = {main_top: 48, header_height: 48, height: window.innerHeight};
+  Brisa.group_settings = {};
   $(window).on('resize', function(r) { Brisa.settings.height = window.innerHeight });
   Brisa.views = [];
+  Brisa.group_views = {};
   Brisa.current_view = null;
   Brisa.CurrentViewIdx = function() {
     for (var i in Brisa.views) {
@@ -57,30 +75,40 @@ export default function() {
       if (Brisa.current_view == rem[0]) Brisa.current_view = Brisa.views[view_idx-1];
     } else { console.log("No view", idx); }
   };
-  Brisa.AddView = function(title, component, ctx, parent, entries) {
+  Brisa.AddView = function(title, component, ctx, parent, entries, group_id) {
+    var group_id = parent ? parent.data.group_id : group_id;
+    if (group_id == undefined) group_id = null;
+    var group = Brisa.Group(group_id);
     var view = {
       title: title,
-      id: (parent || {data: {id: 'dash'}}).data.id + '_' + component,
+      id: (parent || {data: {id: 'dash' + group_id}}).data.id + '_' + component,
       unique_id: Brisa.unique_id(4),
       component: component,
       ctx: ctx,
+      group_id: group_id,
+      group_name: group ? group.data.name : 'Personal',
       parent: parent,
       entries: entries,
     };
     this.views.push(view);
-    Brisa.current_view = view;
+    if (this.group_views[group_id] === undefined) this.group_views[group_id] = [];
+    this.group_views[group_id].push(view);
+    Brisa.LoadModels(group_id).then(function(r) {
+      Brisa.current_view = view;
+    }).catch(function(r) { Brisa.current_view = view; });
     return view;
   };
   Brisa.OpenView = function(parent, uitype) {
     var md = parent.data.metadata;
+    var group_id = parent.data.group_id;
     var cls_md = md[uitype.cls];
-    BrisaAPI.Entry.search(cls_md.tags, cls_md.classes).then(function(r) {
+    BrisaAPI.Entry.search(cls_md.tags, cls_md.classes, group_id).then(function(r) {
       var view = this.AddView(parent.title(), uitype.cmp,
           {tags: cls_md.tags || [], classes: cls_md.classes || []},
           parent, r);
     }.bind(this));    
   };
-  Brisa.OpenKanban = function(parent) {
+/*  Brisa.OpenKanban = function(parent) {
     var md = parent.data.metadata;
     BrisaAPI.Entry.search(md._kanban.tags, md._kanban.classes).then(function(r) {
       var view = this.AddView(parent.title(), 'brisa-kanban',
@@ -104,6 +132,7 @@ export default function() {
           parent, r);
     }.bind(this));
   };
+*/
 
   Brisa.ui_classes = {
     'brisa-kanban': {cmp: 'brisa-kanban', name: 'Kanban', cls: '_kanban', method: 'OpenKanban', icon: 'fa-columns'},
@@ -148,6 +177,24 @@ export default function() {
       if (Brisa.models[i].unique_id() == uid) return Brisa.models[i];
     }
   };
+  Brisa.Group = function(group_id) {
+    for (var i in Brisa.groups) {
+      if (Brisa.groups[i].data.id == group_id) {
+        return Brisa.groups[i];
+        break;
+      }
+    }
+    return undefined;
+  };
+  Brisa.GroupSetting = function(group_id, name, defaults) {
+    var group = Brisa.Group(group_id);
+    if (!group) return undefined;
+    if (!group.settings[name]) {
+      group.setting(name, defaults);
+      return defaults;
+    }
+    return group.settings[name];
+  };
   Brisa.GetSetting = function(name, defaults) {
     return new Promise(function(resolve, reject) {
       if (this.settings[name]) {
@@ -160,7 +207,10 @@ export default function() {
       }
     }.bind(this));
   };
-  Brisa.Labels = function() { return this.GetSetting('labels', ['Important']); };
+  Brisa.Labels = function(group_id) {
+    if (!group_id) return this.GetSetting('labels', ['Important']);
+    
+  };
   Brisa.Theme = function() { return this.GetSetting('theme', {image: 'backgrounds/breeze.jpg'}); };
   Brisa.background_opts = {
     classes: "primary,secondary,dark,light,info,success,danger,warning".split(","),
@@ -191,6 +241,26 @@ export default function() {
     if (string == null) string = '';
     return String(string).replace(/[&<>"'`=\/]/g, function (s) {
       return Brisa.entityMap[s];
+    });
+  };
+  Brisa.group_models = {};
+  Brisa.group_model_map = {}
+  Brisa.LoadModels = function(group_id) {
+    if (Brisa.group_models[group_id]) {
+      return new Promise(function(res) {
+        res(Brisa.group_models[group_id]);
+      });
+    }
+    return BrisaAPI.Model.all(group_id).then(function(r) {
+      Brisa.group_models[group_id] = r;
+      var map = {};
+      Brisa.group_model_map[group_id] = map;
+      for (var i in r) {
+        map[r[i].unique_id()] = r[i];
+      }
+      return r;
+    }).catch(function(r) {
+      console.log("Model list error", r);
     });
   };
   Brisa.formatText = function(text) {

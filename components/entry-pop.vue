@@ -56,7 +56,7 @@
           </a>
           <div ref="add_menu" class="dropdown-menu">
             <a href="#" @click.prevent="AddModel(model.unique_id())" class="dropdown-item"
-                v-if="class_list().indexOf(model.unique_id()) == -1" v-for="model in Brisa.models">
+                v-if="class_list().indexOf(model.unique_id()) == -1" v-for="model in models">
               {{model.title()}}
             </a>
             <a href="#" @click.prevent="SelectBoard(cls.cls, cls.name)" class="dropdown-item text-info"
@@ -74,7 +74,7 @@
         <div>Tags:
         <input v-model="new_board_tags" class="form-control form-control-sm" placeholder="Tags (comma separated)"></div>
         <div>Classes:
-          <div v-for="model in Brisa.models">
+          <div v-for="model in models">
             <label>
             <input v-model="new_board_classes" :value="model.unique_id()" type="checkbox"> {{model.title()}}
             </label>
@@ -111,9 +111,11 @@
       'entry', 'zindex'
     ],
     data: function() {
+      var m = Brisa.group_models[this.entry.group_id() || null];
       return {Brisa: Brisa, show_board: null,
         new_board_tags: '', new_board_classes: [],
         sel_tab: null, confirm_delete: false,
+        models: m,
       };
     },
     methods: {
@@ -164,7 +166,8 @@
       },
       classes: function() {
         return (this.entry.classes() || []).map(function(cls) {
-          return this.Brisa.GetModel(cls);
+          var gm = Brisa.group_model_map[this.entry.data.group_id];
+          return gm[cls];
         }.bind(this));
       },
       class_list: function() {

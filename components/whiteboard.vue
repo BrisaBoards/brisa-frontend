@@ -1,5 +1,6 @@
 <template>
   <div ref="main" class="" :style="'height: 100%; background-color: ' + this.bg_color + '; rgba(0,0,0,0.2); overflow: auto; position: relative;'">
+    <add-card :onSubmit="AddEntry" style="height: 45px; z-index: 1000; position: absolute; left: 15px; top: 15px;"></add-card>
     <div v-if="paper" :style="'position: absolute; background-image: url(' + this.paper + '); opacity: 0.7; width: 100%; top: 0px; height: 100%; right: 0px;'"></div>
     <div :key="entry.data.id" :data-entryid="idx" :ref="'card' + entry.data.id" @mousedown="StartMove" @touchstart="StartMove"
         v-if="entry.data.id != pid" v-for="(entry, idx) in view.entries"
@@ -12,13 +13,16 @@
 </template>
 <script>
   import Vue from 'vue'
+  import AddCard from './add-card.vue'
   export default Vue.extend({
     props: [
       'Brisa', 'view'
     ],
+    components: {'add-card': AddCard},
     data: function() {
       var p = this.view.parent;
       return {
+        expand_add: false,
         pid: p.data.id,
         entry: p,
         add_group: false, new_group: '',
@@ -31,6 +35,13 @@
       };
     },
     methods: {
+      AddEntry: function(title) {
+        var data = {group_id: this.view.group_id, title: title, description: '', tags: this.view.ctx.tags, classes: this.view.ctx.classes};
+
+        Brisa.CreateEntry(data).then(function(r) {
+          this.view.entries.push(r);
+        }.bind(this));
+      },
       OnDelete: function(entry, idx) {
         entry.destroy().then(function(r) {
           this.view.entries.splice(idx, 1);
