@@ -14,9 +14,7 @@ If you just want to try out BrisaBoards, you can go to https://BrisaBoards.com/p
 
 If you would like to install a full Brisa server, check out For Installers below.
 
-You can also download this code to run it directly from your laptop. It is a simple way to try out Brisa.
-
-There will be a link to the download once a copy has been created.
+You can also [Download the Demo](https://brisaboards.com/download.html) to run it directly from your laptop. It is a simple way to try out Brisa.
 
 While your browser will save the data so you can come back to it, it is _not_ recommended that you use this to store information you would be afraid of losing. If your browser profile becomes corrupted, you need to reinstall, or your laptop just stops working, you will lose your data!
 
@@ -36,6 +34,4 @@ The backend is being converted from a hacked-together Ruby Rack app to a Ruby on
 
 ## For Installers
 
-You can run the Brisa backend (not released yet, Aug 2018) anywhere you can run Ruby on Rails and PostgreSQL. It should work fine on a minimal virtual server through DigitalOcean, AWS, or any other cloud providder.
-
-Once the backend is live, a link will be provided here to get started with it.
+You can run the Brisa backend anywhere you can run Ruby on Rails and PostgreSQL. It should work fine on a minimal virtual server through DigitalOcean, AWS, or any other cloud providder. Check out the [downloads page](https://brisaboards.com/downloads.html) for the current version and install instructions.
