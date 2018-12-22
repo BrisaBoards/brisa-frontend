@@ -1,6 +1,7 @@
 <template>
   <brisa-card :color="color" :opacity="opacity" :style="'margin-top: ' + (margin || '10px')">
-    <div @click="onClick" style="cursor: pointer;" @mouseover="hovering = true" @mouseout="hovering = false" :class="wrapper || 'card-body p-3'">
+    <div @click="onClick" style="cursor: pointer;" @mouseover="hovering = true" @mouseout="hovering = false"
+        :class="wrapper || 'card-body pl-3 pt-3 pr-3 pb-1'">
 
       <brisa-popup
         :show.sync="is_selected"
@@ -13,18 +14,18 @@
             <span class="fa fa-2x fa-caret-down"></span>
           </div>
           <slot name="title">
-            <div class="card-title text-info noselect" style="font-size: 120%;" >{{entry.data.title}}</div>
+            <div class="card-title text-info noselect" >{{entry.data.title}}</div>
           </slot>
         </div>
       </brisa-popup>
 
-      <div v-if="!hide_desc" class="card-bodyx text-muted entry-section" style="position: relative; height: 60px; cursor: pointer; overflow: hidden;'">
+      <div v-if="!hide_desc" class="card-bodyx text-muted entry-section" style="position: relative; max-height: 75px; cursor: pointer; overflow: hidden;'">
         <p class="" v-html="fmtText(entry.description())"></p>
       </div>
-      <div>
-        <button style="margin: 2px;" v-for="uit in Brisa.ui_types" @mousedown.stop @touchstart.stop @click.stop="Brisa.OpenView(entry, uit)"
-            v-if="entry.metadata()[uit.cls]" class="btn btn-round-xs btn-outline-primary mr-1"><i :class="'fa ' + uit.icon"></i> {{uit.name}}</button>
-      </div>
+    </div>
+    <div>
+      <button v-for="uit in Brisa.ui_types" @mousedown.stop @touchstart.stop @click.stop="Brisa.OpenView(entry, uit)"
+          v-if="entry.metadata()[uit.cls]" class="btn btn-round-xs btn-outline-primary ml-2 mb-2"><i :class="'fa ' + uit.icon"></i> {{uit.name}}</button>
     </div>
   </brisa-card>
 

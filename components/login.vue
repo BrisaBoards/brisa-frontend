@@ -4,7 +4,7 @@
         <div class="card p-4" style="xmin-width: 300px; max-width: 500px;">
           
           <div v-if="Brisa.user.logged_in == false">
-            <h2><img src="favicon.ico" class="float-left mr-3" style="display: inline-block; width: auto; height: 25px;">Log In</h2>
+            <h2><img src="favicon.ico" class="float-left mr-3" style="display: inline-block; width: auto; height: 35px;">Log In</h2>
             <br/>
             <h4>E-Mail Address:</h4>
             <input ref="email" @keypress.enter="$refs.password.focus()" type="text" name="email" class="form-control bg-light" v-model="email">
@@ -14,9 +14,12 @@
             <div v-if="message" class="p-3 text-danger">{{message}}</div>
           </div>
           <div v-else>
-            <h2><img src="favicon.ico" class="float-left mr-3" style="display: inline-block; width: auto; height: 25px;">One Moment...</h2>
+            <h2><img src="favicon.ico" class="float-left mr-3" style="display: inline-block; width: auto; height: 25px;">
+              <span v-if="!Brisa.login_error">One Moment...</span>
+              <span v-else class="text-danger">{{Brisa.login_error}}</span>
+            </h2>
             <br/>
-            <p></p>
+            <p v-if="Brisa.login_error">The server, or your Internet connection, may be down.</p>
           </div>
         </div>
       </div>
@@ -30,9 +33,9 @@
     methods: {
       DoLogin: function() {
         BrisaAPI.User.login(this.email, this.password).then((r) => {
-          Brisa.Login(r.data);
+          Brisa.Login(r.data, r.data.auth_token);
         }).catch((e) => {
-          this.message = e.responseJSON.error ? e.responseJSON.error : 'Login failure';
+          this.message = e.json.error ? e.json.error : 'Login failure';
         });
       }
     },

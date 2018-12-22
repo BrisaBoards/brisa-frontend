@@ -4,9 +4,11 @@
     props: [
     ],
     data: function() {
-      return {sel_tab: 'theme', theme: null,
+      return {sel_tab: 'acct', theme: null,
         Brisa: Brisa, BrisaAPI: BrisaAPI,
         drag: false,
+        current_pass: '', new_pass1: '', new_pass2: '',
+        pass_changed: false, pass_error: null,
         new_label: '',
         labels: [],
         label_set: {data:[]},
@@ -14,6 +16,21 @@
       };
     },
     methods: {
+      ChangePass: function() {
+        if (this.new_pass1 != this.new_pass2) {
+          this.pass_error = 'New passwords do not match.';
+        } else {
+          BrisaAPI.User.change_pass(this.current_pass, this.new_pass1).then(function(r) {
+            this.pass_changed = true;
+            this.current_pass = '';
+            this.new_pass1 = '';
+            this.new_pass2 = '';
+            this.pass_error = null;
+          }.bind(this)).catch(function(err) {
+            this.pass_error = 'Error updating password: ' + (err.json || {}).error;
+          }.bind(this));
+        }
+      },
       AddLabel: function() {
         this.label_set.data.setting.push(this.new_label);
         this.label_set.update().then(function(r) {
@@ -49,10 +66,7 @@
   });
 </script>
 <template>
-  <div class="col-12">
-    
-    <br/>
-    <brisa-card style="width: 100%;">
+    <brisa-card style="width: 100%;" :opacity="0.95">
       <div class="card-body m-3" style="padding: 10px;">
         <div>
           <button @click="$emit('close')" class="float-right btn btn-lg btn-primary">Close</button>
@@ -65,7 +79,7 @@
             </a>
           </li>
           <li class="nav-item">
-            <a @click.prevent="sel_tab = 'theme'" :class="'nav-link' + (sel_tab == 'theme' ? ' active' : '')" href="#">Theme</a>
+            <a @click.prevent="sel_tab = 'acct'" :class="'nav-link' + (sel_tab == 'acct' ? ' active' : '')" href="#">Account</a>
           </li>
           <li class="nav-item">
             <a @click.prevent="sel_tab = 'labels'" :class="'nav-link' + (sel_tab == 'labels' ? ' active' : '')" href="#">Labels</a>
@@ -104,8 +118,8 @@
           </select>
           <button @click="SaveWB()" class="btn btn-sm btn-info">Save</button>
         </div>
-        <div v-if="sel_tab == 'theme'">
-          <h4 class="card-title">Background</h4>
+        <div v-if="sel_tab == 'acct'">
+          <h3 class="card-title">Background</h3>
           
           <select class="form-control form-control-sm" @change="SaveTheme" v-model="theme.data.setting">
             <option>Select Background Style</option>
@@ -113,6 +127,22 @@
             <option :value="{bg_class: cls}" v-for="cls in Brisa.background_opts.classes">{{cls}}</option>
             <option :value="{color: color}" v-for="color in Brisa.background_opts.colors">{{color}}</option>
           </select>
+
+          <div v-if="false">
+          <h3 class="mt-5">Alias</h3>
+          <input v-model="Brisa.user.alias" class="form-control" />
+          <button class="btn btn-outline-primary btn-sm mt-2">Update Alias</button>
+          </div>
+
+          <h3 class="mt-5">Change Password</h3>
+          <h4>Current Password</h4>
+          <input type="password" v-model="current_pass" placeholder="Current Password" class="form-control form-control-sm" />
+          <h5>New Password</h5>
+          <input type="password" v-model="new_pass1" placeholder="New Password" class="form-control form-control-sm" />
+          <input type="password" v-model="new_pass2" placeholder="Re-enter Password" class="form-control form-control-sm" />
+          <button @click="ChangePass" class="btn btn-outline-primary btn-sm mt-2">Change Password</button>
+          <div class="text-danger" v-if="pass_error">{{pass_error}}</div>
+          <div class="text-success" @click="pass_changed=false" v-if="pass_changed">Your password has been updated.</div>
         </div>
         <div v-if="sel_tab == 'labels'">
           <h4 class="card-title">Labels</h4>
@@ -144,6 +174,5 @@
         </div>
       </div>
     </brisa-card>
-  </div>
 
 </template>

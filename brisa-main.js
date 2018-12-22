@@ -1,9 +1,24 @@
 import Vue from 'vue';
 import brisa_main_component from './components/main.vue';
+import BrisaMessager from './lib/messager.js';
+import BrisaCache from './lib/cache.js';
+
 export default function() {
   var Brisa = new function() { return {}; };
-
   Brisa.brisa_first_run = false;
+  Brisa.views = [];
+  Brisa.group_views = {};
+  // Real-time handlers
+  Brisa.ActionCable = require('actioncable');
+  Brisa.EventBus = new Vue();
+  Brisa.cable = null;
+  Brisa.cache = new BrisaCache();
+  Brisa.cache.Register('Entry', {
+    key: function(entry_id) { return entry_id },
+    lookup: function(entry_id) { return BrisaAPI.Entry.find(entry_id) },
+  });
+  Brisa.messager = new BrisaMessager(Brisa.cache, Brisa.views);
+
   if (process.env.BACKEND) {
     console.log("Setting backend path", process.env.BACKEND);
     BrisaAPI._api_path = process.env.BACKEND;
@@ -12,6 +27,7 @@ export default function() {
     BrisaAPI._brisa_idb = new BrisaIDB('organizer-demo');
   }
   Brisa.results = [];
+  Brisa.login_error = null;
   Brisa.user = {
     logged_in: null,
     uid: 1,
@@ -26,9 +42,67 @@ export default function() {
       document.documentElement.webkitRequestFullScreen(Element.ALLOW_KEYBOARD_INPUT);
     }
   }
-  Brisa.Login = function(user) {
-    localStorage.setItem('brisa-token', user.auth_token);
-    BrisaAPI._include.auth_token = user.auth_token;
+  Brisa.logout = function() {
+    if (Brisa.cable) Brisa.cable.disconnect();
+    Brisa.views = [];
+    Brisa.group_views = {};
+    localStorage.removeItem('brisa-token');
+    Brisa.user.logged_in = false;
+  };
+  Brisa.wsPing = function() {
+    if (Brisa.cable_mon_ping) Brisa.cable_mon_ping();
+    Brisa.last_ws_ping = new Date();
+  };
+  Brisa.wsOpen = function() {
+    var last_ping = Brisa.last_ws_ping;
+    if (Brisa.cable_mon_open) Brisa.cable_mon_open();
+    if (last_ping == undefined) {
+      return
+    }
+    var since = (last_ping.getTime() / 1000).toFixed();
+    BrisaAPI.Entry.updates(since).then(function(r) {
+      for (var i of r.data) {
+        Brisa.onMessage(i)
+      }
+    });
+  };
+  Brisa.onMessage = function(data) {
+    data.stamp = (new Date()).getTime();
+    if (data.m == 'sid') {
+      console.log("Got session id", data.sid)
+      BrisaAPI._include.sid = data.sid;
+      return;
+    } else if (data.m == 'ent') {
+      Brisa.messager.onMessage(data);
+    }
+  };
+  Brisa.socketURL = function() {
+    var full_path = BrisaAPI._api_path;
+    if (full_path.startsWith('/')) {
+      full_path = document.documentURI + full_path;
+    }
+    full_path = full_path + '/updates?auth_token=' + BrisaAPI._include.auth_token;
+    return full_path.replace(/^http/, 'ws');
+  };
+  Brisa.startSocket = function() {
+    if (!BrisaAPI._api_path) return;
+    Brisa.last_ws_ping = undefined;
+    if (Brisa.cable) Brisa.cable.disconnect();
+    Brisa.cable = Brisa.ActionCable.createConsumer(Brisa.socketURL());
+    var mon = Brisa.cable.connection.monitor;
+    Brisa.cable_mon_ping = mon.recordPing.bind(mon);
+    Brisa.cable_mon_open = mon.recordConnect.bind(mon);
+    mon.recordPing = Brisa.wsPing ;
+    mon.recordConnect = Brisa.wsOpen;
+    Brisa.cable.subscriptions.create({channel: 'UserChannel'}, {received: Brisa.onMessage });
+  };
+
+  Brisa.Login = function(user, auth_token) {
+    if (auth_token) {
+      localStorage.setItem('brisa-token', auth_token);
+      BrisaAPI._include.auth_token = auth_token;
+    }
+    Brisa.startSocket();
     Brisa.LoadModels(null);
     BrisaAPI.User.groups().then(function(r) {
       Vue.set(Brisa, 'groups', [{data:{id: null, name: 'Personal'}}].concat(r));
@@ -59,8 +133,6 @@ export default function() {
   Brisa.settings = {main_top: 48, header_height: 48, height: window.innerHeight};
   Brisa.group_settings = {};
   $(window).on('resize', function(r) { Brisa.settings.height = window.innerHeight });
-  Brisa.views = [];
-  Brisa.group_views = {};
   Brisa.current_view = null;
   Brisa.CurrentViewIdx = function() {
     for (var i in Brisa.views) {
@@ -108,31 +180,6 @@ export default function() {
           parent, r);
     }.bind(this));    
   };
-/*  Brisa.OpenKanban = function(parent) {
-    var md = parent.data.metadata;
-    BrisaAPI.Entry.search(md._kanban.tags, md._kanban.classes).then(function(r) {
-      var view = this.AddView(parent.title(), 'brisa-kanban',
-          {tags: md._kanban.tags || [], classes: md._kanban.classes || []},
-          parent, r);
-    }.bind(this));
-  };
-  Brisa.OpenWhiteboard = function(parent) {
-    var md = parent.data.metadata;
-    BrisaAPI.Entry.search(md._whiteboard.tags, md._whiteboard.classes).then(function(r) {
-      var view = this.AddView(parent.title(), 'brisa-whiteboard',
-          {tags: md._whiteboard.tags || [], classes: md._whiteboard.classes || []},
-          parent, r);
-    }.bind(this));
-  };
-  Brisa.OpenSheet = function(parent) {
-    var md = parent.data.metadata;
-    BrisaAPI.Entry.search(md._sheet.tags, md._sheet.classes).then(function(r) {
-      var view = this.AddView(parent.title(), 'brisa-sheet',
-          {tags: md._sheet.tags || [], classes: md._sheet.classes || []},
-          parent, r);
-    }.bind(this));
-  };
-*/
 
   Brisa.ui_classes = {
     'brisa-kanban': {cmp: 'brisa-kanban', name: 'Kanban', cls: '_kanban', method: 'OpenKanban', icon: 'fa-columns'},
@@ -211,12 +258,14 @@ export default function() {
     if (!group_id) return this.GetSetting('labels', ['Important']);
     
   };
-  Brisa.Theme = function() { return this.GetSetting('theme', {image: 'backgrounds/breeze.jpg'}); };
+  Brisa.Theme = function() { return this.GetSetting('theme', {image: 'backgrounds/breeze2.jpg'}); };
   Brisa.background_opts = {
     classes: "primary,secondary,dark,light,info,success,danger,warning".split(","),
     colors: "red,green,blue".split(","),
     images: [
-      {url: 'backgrounds/breeze.jpg', title: 'Breeze'},
+      {url: 'backgrounds/breeze2.jpg', title: 'Brisa Watercolor'},
+      {url: 'backgrounds/breeze.jpg', title: 'Brisa'},
+      {url: 'backgrounds/bg-blue-grey.jpg', title: 'Blue Gradient'},
       {url: 'backgrounds/aonang.jpg', title: 'Ao Nang Islands'},
       {url: 'backgrounds/phiphi.jpg', title: 'Phi Phi, Thailand'},
     ]
@@ -295,6 +344,8 @@ export default function() {
       } else {
         Brisa.user = r.data;
       }
+    }).catch(function(err) {
+      Brisa.login_error = err.json.error || 'Unable to check login status';
     });
 
     setInterval(function() {

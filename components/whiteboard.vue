@@ -1,9 +1,9 @@
 <template>
-  <div ref="main" class="" :style="'height: 100%; background-color: ' + this.bg_color + '; rgba(0,0,0,0.2); overflow: auto; position: relative;'">
+  <div ref="main" class="" :style="'height: 100%; width: 100%; background-color: ' + this.bg_color + '; rgba(0,0,0,0.2); overflow: auto; position: absolute;'">
     <add-card :onSubmit="AddEntry" style="height: 45px; z-index: 1000; position: absolute; left: 15px; top: 15px;"></add-card>
     <div v-if="paper" :style="'position: absolute; background-image: url(' + this.paper + '); opacity: 0.7; width: 100%; top: 0px; height: 100%; right: 0px;'"></div>
     <div :key="entry.data.id" :data-entryid="idx" :ref="'card' + entry.data.id" @mousedown="StartMove" @touchstart="StartMove"
-        v-if="entry.data.id != pid" v-for="(entry, idx) in view.entries"
+        class="mb-1 mr-2" v-if="entry.data.id != pid" v-for="(entry, idx) in view.entries"
         :style="EntryPos(entry.data.id) + ' width: 200px; position: absolute;'">
       <brisa-entry-card @delete="OnDelete(entry, idx)" :color.sync="card_bg" :entry="entry" :select="onSelect" :selected.sync="selected_entry">
       </brisa-entry-card>
@@ -39,12 +39,14 @@
         var data = {group_id: this.view.group_id, title: title, description: '', tags: this.view.ctx.tags, classes: this.view.ctx.classes};
 
         Brisa.CreateEntry(data).then(function(r) {
+          for (var i in this.view.entries) { if (this.view.entries[i].data.id == r.data.id) return; }
           this.view.entries.push(r);
         }.bind(this));
       },
       OnDelete: function(entry, idx) {
         entry.destroy().then(function(r) {
-          this.view.entries.splice(idx, 1);
+          if (this.view.entries[idx].data.id == entry.data.id)
+            this.view.entries.splice(idx, 1);
         }.bind(this));
       },
       onSelect: function(entry, ignore_move) {
@@ -104,9 +106,23 @@
         if (md.positions && md.positions[entry_id]) {
           return "left: " + md.positions[entry_id].x + "; top: " + md.positions[entry_id].y + ";";
         } else {
-          return "left: 0px; top: 0px;";
+          return "left: 55px; top: 55px;";
         }
       },
+      RTUpdate: function(entry, event) {
+        if (event == 'add') {
+          for (var i in this.view.entries) { if (this.view.entries[i].data.id == entry.data.id) return; }
+          this.view.entries.unshift(entry)
+        } else if (event == 'destroy') {
+          if (entry.index && this.view.entries[entry.index].data.id == entry.id) this.view.entries.splice(entry.index, 1);
+        }
+      },
+    },
+    beforeDestroy: function() {
+      Brisa.messager.Unregister(this.view);
+    },
+    mounted: function() {
+      Brisa.messager.Register(this.view, this.RTUpdate, this.RTUpdate, this.RTUpdate);
     },
     computed: {
       bg_color: function() {
@@ -129,7 +145,7 @@
     created: function() {
       var md = this.entry.metadata();
       if (md.style == undefined) {
-        md.style = {card_bg: '#fffffa', color: '0,0,0', opacity: 0.2, paper: '', grid: 10};
+        md.style = {card_bg: '#fffffa', color: '0,0,0', opacity: 0.0, paper: '', grid: 10};
       }
     },
   });

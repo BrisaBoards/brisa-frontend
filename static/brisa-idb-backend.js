@@ -22,6 +22,15 @@ BrisaIDB.action = function(action, store, method, cb) {
   };
 };
 
+BrisaIDB.prototype.raw_create = function(store_name, data) {
+  this.dbP.then(function(db) {
+    var tx = db.transaction(store_name, 'readwrite');
+    var store = tx.objectStore(store_name);
+    store.add(data);
+    tx.complete;
+  }.bind(this));
+};
+
 BrisaIDB.handlers = {
   destroy: function(action, args, resolve, reject) {
     delete args['action'];
@@ -48,7 +57,6 @@ BrisaIDB.handlers = {
       }).catch(function(e) { console.log("Err", e); resolve({}) });
       return tx.complete;
     });
-    //resolve({data: {setting: {}, metadata:{theme: ''}}});
   },
   iter: function(action, args, resolve, reject) {
     console.log("Iterating over ", action.store, action.action, this.dbP);
@@ -113,6 +121,7 @@ BrisaIDB.action('Group:create', 'groups', 'create', function(obj) {
 });
 
 BrisaIDB.action('Model:all', 'models', 'iter', function(obj, args) {
+  if (obj.group_id == undefined) obj.group_id = null;
   if (obj.group_id == args.group_id) return true;
   return false;
 });

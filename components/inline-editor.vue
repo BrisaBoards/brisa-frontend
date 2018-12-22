@@ -15,29 +15,27 @@
         </span>
       </component>
     </div>
-    <component style="height: 100%; min-height: 50px;" :is="wrapper || 'div'" v-if="do_edit" class="d-flex">
+    <component style="height: 100%; min-height: 50px;" :is="wrapper || 'div'" v-if="do_edit" class="xd-flex">
       <div class="flex-grow-1" style="height: 100%; position: relative;">
-      <input ref="editor" v-if="val_type == 'int' || val_type == 'string'" v-model="edit_val"
-          @keyup="checkKeyCode" style="height: 100%;" class="form-control xform-control-sm bg-light">
+      <input ref="editor" v-if="val_type == 'int' || val_type == 'string'" @keydown.tab.prevent="$refs.done.focus()" v-model="edit_val"
+          @keyup="checkKeyCode" style="xheight: 2em;" class="form-control pt-1 pb-1 border border-secondary xform-control-sm bg-light">
       <div v-else-if="val_type == 'text' || val_type=='markdown'">
-        <textarea ref="editor" @keyup.esc="CancelEdit()" @input="resizeTextarea"
-            class="form-control bg-light" v-model="edit_val" rows="3"></textarea>
+        <textarea ref="editor" @keydown.tab.prevent="$refs.done.focus()" @keyup.esc="CancelEdit()" @input="resizeTextarea"
+            class="form-control border border-secondary bg-light" style="min-height: 50px;" v-model="edit_val"></textarea>
       </div>
       <div v-else-if="val_type == 'enum'">
-        <select v-model="edit_val" @change="DoneEditing()" ref="editor" class="form-control bg-light">
+        <select v-model="edit_val" @keydown.tab.prevent="$refs.done.focus()" @change="DoneEditing()" ref="editor" class="form-control bg-light">
           <option :value="opt[0]" v-for="opt in enum_list">{{opt[1]}}</option>
         </select>
-        <button class="btn btn-sm btn-danger" @click="CancelEdit()">Cancel</button>
       </div>
       <div v-else>
-        <input ref="editor" v-model="edit_val" @keyup="checkKeyCode" class="form-control form-control-sm bg-light">
+        <input ref="editor" v-model="edit_val" @keydown.tab.prevent="$refs.done.focus()" @keyup="checkKeyCode" class="form-control form-control-sm bg-light">
         <small>Need handler for {{val_type}}</small>
       </div>
       </div>
-      <div style="width: 30px;">
-        <button @click="DoneEditing" style="width: 100%; margin-bottom: 0px;" class="btn btn-sm btn-primary"><i class="fa fa-check"></i></button>
-        <br/>
-        <button @click="CancelEdit" style="width: 100%;" class="btn btn-sm btn-warning"><i class="fa fa-times"></i></button>
+      <div class="bg-secondary p-2 border border-dark rounded" style="z-index: 5; position: absolute; transform: translateX(15%);">
+        <button @click="DoneEditing" ref="done" style="margin-bottom: 0px;" class="btn btn-sm btn-outline-success mr-2"><i class="fa fa-check"></i></button>
+        <button @click="CancelEdit" style="" class="btn btn-sm btn-outline-danger"><i class="fa fa-times"></i></button>
       </div>
     </component>
   </div>
@@ -83,7 +81,7 @@
           this.$nextTick(function() { this.resizeTextarea() }.bind(this));
       },
       resizeTextarea: function() {
-        Brisa.sizeTextarea(this.$refs.editor, 40, 650);
+        Brisa.sizeTextarea(this.$refs.editor, 75, 650);
       },
     },
     mounted: function() {

@@ -1,27 +1,27 @@
 <template>
   <div ref="main" class="" class="d-flex xjustify-content-center"
-      :style="'height: 100%; padding: 0px; width: 100%; overflow-x: scroll; position: relative;'">
+      :style="'height: 100%; padding: 0px; width: 100%; position: absolute;'">
     <div style="padding-bottom: 2px;"></div>
 
-    <table class="table xtable-striped table-hover sheet-table" style="width: auto; background-color: rgba(255,255,255,0.93)">
-      <thead class="xthead-light" style="font-weight: normal">
+    <table class="table xtable-striped text-dark table-hover sheet-table" style="width: auto; background-color: rgba(255,255,255,0.95)">
+      <thead class="xthead-light text-muted bg-light" style="font-weight: normal">
         <tr v-if="models.length > 0">
-          <th colspan="3" style="border: 2px solid #d0d0d0;"></th>
-          <th style="text-align: center;border: 2px solid #d0d0d0;" :colspan="model_dict[model].config().fields.length" v-for="model in models">
+          <th colspan="3" style="border: 1px solid #eee;"></th>
+          <th style="text-align: center;border: 1px solid #eee;" v-if="model_dict[model]" :colspan="model_dict[model].config().fields.length" v-for="model in models">
             <div class="sheet-cell-cont" style="width: 200px;">{{model_dict[model].title()}}</div>
             
           </th>
         </tr>
         <tr>
-        <th style="width: 50px;"></th>
-        <th style="width: 50px; border: 2px solid #d0d0d0;">
+        <th style="width: 50px; border: 0;"></th>
+        <th style="width: 50px; border: 1px solid #eee;">
           <div class="sheet-cell-cont" style="width: 200px;">Title</div>
         </th>
-        <th style="width: 100px; border: 2px solid #d0d0d0;">
+        <th style="width: 100px; border: 1px solid #eee;">
           <div class="sheet-cell-cont" style="width: 200px;">Description</div>
         </th>
         <template v-for="(model,idx) in models">
-          <th v-for="(field,idx) in (model_dict[model].config() || {fields: []}).fields" style="border: 2px solid #d0d0d0;" >
+          <th v-if="model_dict[model]" v-for="(field,idx) in (model_dict[model].config() || {fields: []}).fields" style="border: 1px solid #eee;" >
             <div class="sheet-cell-cont" style="width: 200px;">{{field.title}}</div>
           </th>
         </template>
@@ -33,29 +33,29 @@
         <tr :key="entry + '_' + idx"
           v-if="entry_dict[entry] != undefined && entry_dict[entry].data.id != pid" v-for="(entry, idx) in entries"
           style="padding: 0px; margin: 0px;">
-          <td style="height: 100%;">
+          <td style="height: 100%; border: 1px solid #eee;">
             <div class="xsheet-cell-cont" style="padding: 3px; height: 100%;">
-              <span class="sheet-handle"><span class="fa fa-arrows-alt-v" style="cursor: pointer;"></span></span>
+              <span class="sheet-handle"><span class="fa fa-arrows-alt-v" style="color: #bbb; cursor: pointer;"></span></span>
               &nbsp;
-              <button @click="onToggle(idx)"
+              <button @click="onToggle(entry)"
                   :class="'btn btn-sheet ' + (select_idx == idx ? 'btn-primary' : 'btn-outline-primary')"
                   style="height: 100%; xborder-radius: 50px; xpadding: 3px;">
                 &nbsp;{{idx+1}}&nbsp;
               </button>
               <brisa-popup
                   :key="idx"
-                  v-if="select_idx == idx"
+                  v-if="select_idx == entry"
                   :show="true"
                   wrap_style="cursor: default; width: 98vw; padding-left: 10px; padding-right: 10px;"
                   >
-                <brisa-entry-pop @delete="OnDelete(entry_dict[entry], idx)" v-if="selected[idx]" slot="popup" :entry="entry_dict[entry]" @on-close="onToggle(idx)"></brisa-entry-pop>
+                <brisa-entry-pop @delete="OnDelete(entry_dict[entry], idx)" v-if="select_idx == entry" slot="popup" :entry="entry_dict[entry]" @on-close="onToggle(entry)"></brisa-entry-pop>
         
                 <slot name="title">
                 </slot>
               </brisa-popup>  
             </div>
           </td>
-          <td style="height: 100%;">
+          <td style="height: 100%; border: 1px solid #ddd">
             <div v-if="!open_cells[idx + '_title']" @click="$set(open_cells, idx + '_title', true)" style="width: 200px">
               <div class="d-flex sheet-cell-cont" style="max-width: 100%;">
                 <div class="flex-grow-1 xsheet-cell-cont">
@@ -68,7 +68,7 @@
             </div>
             <brisa-inline-editor v-else :isOpen="true" @done-editing="$set(open_cells, idx + '_title', false)" name="Title" :updated="UpdatedAttr" :update_ref="[entry_dict[entry], 'title']" val_type="string" :value="entry_dict[entry].title()"></brisa-inline-editor>
           </td>
-          <td style="height: 100%;">
+          <td style="height: 100%; border: 1px solid #ddd">
             <div v-if="!open_cells[idx + '_desc']" @click="$set(open_cells, idx + '_desc', true)" class="sheet-cell-cont" style="width: 200px">
               {{entry_dict[entry].description()}}
             </div>
@@ -80,7 +80,7 @@
                 Add
               </div>
             </td>
-            <td v-else v-for="(field,f_idx) in (model_dict[model].config() || {fields: []}).fields" style="height: 100%">
+            <td v-else-if="model_dict[model]" v-for="(field,f_idx) in (model_dict[model].config() || {fields: []}).fields" style="border: 1px solid #ddd; height: 100%">
               <div v-if="!open_cells[idx + ':' + model + ':' + field.id]"
                   @click="$set(open_cells, idx + ':' + model + ':' + field.id, true)" class="sheet-cell-cont" style="width: 200px">
                 {{((entry_dict[entry].metadata()[model] || {})[field.id]) || ''}}
@@ -131,9 +131,13 @@
     },
     methods: {
       OnDelete: function(entry, idx) {
+        if (this.select_idx == entry.data.id) this.select_idx = -1;
         entry.destroy().then(function(r) {
-          delete this.entry_dict[entry];
-          this.entries.splice(idx, 1);
+          delete this.entry_dict[entry.data.id];
+          var cidx = this.entries.indexOf(entry.data.id);
+          if (cidx != -1) {
+            this.entries.splice(cidx, 1);
+          }
         }.bind(this));
       },
       onSelect: function(entry) {
@@ -178,6 +182,7 @@
         var copts = {title: this.new_entry, group_id: this.view.group_id, tags: this.view.ctx.tags || [], classes: this.view.ctx.classes || []};
         BrisaAPI.Entry.create(copts).then(function(r) {
           this.new_entry = '';
+          if (this.entry_dict[r.data.id]) return;
           this.view.entries.push(r);
           this.entry_dict[r.data.id] = r;
           this.entries.push(r.data.id);
@@ -187,6 +192,42 @@
         this.entry.metadata()._sheet.entries = this.entries;
         this.entry.update();
       },
+      InitEntries: function() {
+        var md = this.view.parent.metadata();
+        if (md._sheet.entries == null) md._sheet.entries = [];
+        this.entries = md._sheet.entries;
+        for (var ent of this.view.entries) {
+          if (this.entries.indexOf(ent.data.id) == -1) {
+            this.entries.push(ent.data.id);
+          }
+        }
+        this.entry_dict[ent.data.id] = ent;
+      },
+      RTUpdate: function(entry, event) {
+        if ((entry.data || {}).id == this.view.parent.data.id) {
+          this.InitEntries();
+        }
+        if (event == 'add') {
+          if (this.entries.indexOf(entry.data.id) != -1) return;
+          this.view.entries.push(entry);
+          this.entry_dict[entry.data.id] = entry;
+          this.entries.push(entry.data.id);
+        } else if (event == 'destroy') {
+          if (entry.index) {
+            delete this.entry_dict[entry.id];
+            var idx = this.entries.indexOf(entry.id);
+            if (idx != -1) {
+              this.entries.splice(idx, 1);
+            }
+          }
+        }
+      },
+    },
+    beforeDestroy: function() {
+      Brisa.messager.Unregister(this.view);
+    },
+    mounted: function() {
+      Brisa.messager.Register(this.view, this.RTUpdate, this.RTUpdate, this.RTUpdate);
     },
     created: function() {
       var md = this.entry.metadata();
@@ -217,9 +258,14 @@
             this.models.push(m);
           }
           if (!this.model_dict[m]) {
-            this.model_dict[m] = Brisa.model(m);
+            var model = Brisa.group_model_map[this.view.group_id][m];
+            this.model_dict[m] = model;
           }
         }
+      }
+      for (var i=this.entries.length -1; i>=0; i--) {
+        if (!this.entry_dict[this.entries[i]])
+          this.entries.splice(i, 1); 
       }
       console.log("Models", this.models, this.model_dict);
     },

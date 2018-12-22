@@ -54,6 +54,7 @@
     <br/>
     <h3>New Model</h3>
     <input v-model="new_model_title" class="form-control form-control-sm" placeholder="Model Title">
+    <input v-model="new_model_id" class="form-control form-control-sm" placeholder="Internal ID (leave blank)">
     <button @click="AddModel()" class="btn btn-sm btn-info">Add</button>
   </div>
 
@@ -69,6 +70,7 @@
         sel_group: null,
         sel_model: null,
         new_model_title: '',
+        new_model_id: '',
         new_field_title: '', new_field_type: null,
         Brisa: Brisa,
       };
@@ -79,10 +81,12 @@
         this.sel_model = this.sel_model == m ? null : m;
       },
       AddModel: function() {
-        BrisaAPI.Model.create({group_id: this.sel_group, unique_id: Brisa.unique_id(8, this.new_model_title), title: this.new_model_title, config: {fields:[]}}).then(function(r) {
+        var uid = this.new_model_id || Brisa.unique_id(8, this.new_model_title);
+        BrisaAPI.Model.create({group_id: this.sel_group, unique_id: uid, title: this.new_model_title, config: {fields:[]}}).then(function(r) {
           Brisa.group_models[this.sel_group].push(r);
           Brisa.group_model_map[this.sel_group][r.unique_id()] = r;
           this.new_model_title = '';
+          this.new_model_id = '';
         }.bind(this));
       },
       AddField: function() {

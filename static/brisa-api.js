@@ -1,5 +1,5 @@
 // Brisa javascript client library, Version Brisa0.
-// Auto-generated on 2018-10-18
+// Auto-generated on 2018-12-21
 
 var BrisaAPI = {
   _include: {}
@@ -25,10 +25,22 @@ BrisaAPI.Request = function(action, args) {
   for (var i in BrisaAPI._include) { send_args[i] = BrisaAPI._include[i] };
   for (var i in args) { send_args[i] = args[i] };
   if (BrisaAPI._api_path)
-    return $.ajax({
-      type: 'POST', url: BrisaAPI._api_path + '/' + action,
-      contentType: "application/json; charset=utf-8",
-      data: JSON.stringify(send_args),
+    return new Promise(function(resolve, reject) {
+      fetch(
+        BrisaAPI._api_path + '/' + action,
+        { method: 'POST',
+          headers: { 'Content-Type': 'application/json; charset=utf-8' },
+          body: JSON.stringify(send_args) }
+        ).then(function(r) {
+          var json_result = {};
+          r.json().then(function(json) {
+            if (r.ok) resolve(json); else reject({statusCode: r.statusCode, json: json});
+          }).catch(function(err) {
+            if (r.ok) resolve({}); else reject({statusCode: r.statusCode, json: {}});
+          });
+        }).catch(function(err) {
+          reject({statusCode: 0, json: {}, error: err});
+        });
     });
   else
     return BrisaAPI._brisa_idb.dispatch(action, send_args);
@@ -46,6 +58,16 @@ BrisaAPI.SendRequest = function(action, args, ret_type, is_array, o_self) {
 
 BrisaAPI.Entry = function(state) { this.data = state;};
 
+BrisaAPI.Entry.find = function(id) {
+  var args = { id: id };
+  return BrisaAPI.SendRequest('Entry:find', args, BrisaAPI.Entry, false);
+};
+
+BrisaAPI.Entry.updates = function(since) {
+  var args = { since: since };
+  return BrisaAPI.SendRequest('Entry:updates', args, null, false);
+};
+
 BrisaAPI.Entry.search = function(tags, classes, group_id) {
   var args = { tags: tags, classes: classes, group_id: group_id };
   return BrisaAPI.SendRequest('Entry:search', args, BrisaAPI.Entry, true);
@@ -58,22 +80,22 @@ BrisaAPI.Entry.create = function(data) {
 
 BrisaAPI.Entry.update = function(id, data) {
   var args = { id: id, data: data };
-  return BrisaAPI.SendRequest('Entry:update', args, null, false);
+  return BrisaAPI.SendRequest('Entry:update', args, BrisaAPI.Entry, false);
 };
 
 BrisaAPI.Entry.add_tags = function(id, tags) {
   var args = { id: id, tags: tags };
-  return BrisaAPI.SendRequest('Entry:add_tags', args, null, false);
+  return BrisaAPI.SendRequest('Entry:add_tags', args, BrisaAPI.Entry, false);
 };
 
 BrisaAPI.Entry.remove_tags = function(id, tags) {
   var args = { id: id, tags: tags };
-  return BrisaAPI.SendRequest('Entry:remove_tags', args, null, false);
+  return BrisaAPI.SendRequest('Entry:remove_tags', args, BrisaAPI.Entry, false);
 };
 
 BrisaAPI.Entry.edit_class = function(id, class_name, cfg) {
   var args = { id: id, class_name: class_name, cfg: cfg };
-  return BrisaAPI.SendRequest('Entry:edit_class', args, null, false);
+  return BrisaAPI.SendRequest('Entry:edit_class', args, BrisaAPI.Entry, false);
 };
 
 BrisaAPI.Entry.destroy = function(id) {
@@ -87,6 +109,16 @@ BrisaAPI.User = function(state) { this.data = state;};
 BrisaAPI.User.status = function(renew) {
   var args = { renew: renew };
   return BrisaAPI.SendRequest('User:status', args, null, false);
+};
+
+BrisaAPI.User.update_account = function(alias) {
+  var args = { alias: alias };
+  return BrisaAPI.SendRequest('User:update_account', args, null, false);
+};
+
+BrisaAPI.User.change_pass = function(password, new_password) {
+  var args = { password: password, new_password: new_password };
+  return BrisaAPI.SendRequest('User:change_pass', args, null, false);
 };
 
 BrisaAPI.User.login = function(email, password) {
@@ -119,7 +151,7 @@ BrisaAPI.Model.create = function(data) {
 
 BrisaAPI.Model.update = function(id, data) {
   var args = { id: id, data: data };
-  return BrisaAPI.SendRequest('Model:update', args, null, false);
+  return BrisaAPI.SendRequest('Model:update', args, BrisaAPI.Model, false);
 };
 
 
@@ -137,7 +169,7 @@ BrisaAPI.UserSetting.create = function(name, setting) {
 
 BrisaAPI.UserSetting.update = function(id, data) {
   var args = { id: id, data: data };
-  return BrisaAPI.SendRequest('UserSetting:update', args, null, false);
+  return BrisaAPI.SendRequest('UserSetting:update', args, BrisaAPI.UserSetting, false);
 };
 
 BrisaAPI.UserSetting.destroy = function(id) {
@@ -155,7 +187,7 @@ BrisaAPI.Group.create = function(name) {
 
 BrisaAPI.Group.add_share = function(id, email, access) {
   var args = { id: id, email: email, access: access };
-  return BrisaAPI.SendRequest('Group:add_share', args, null, false);
+  return BrisaAPI.SendRequest('Group:add_share', args, BrisaAPI.Group, false);
 };
 
 BrisaAPI.Group.remove_share = function(id, email) {
@@ -171,6 +203,29 @@ BrisaAPI.Group.shares = function(id) {
 BrisaAPI.Group.setting = function(id, name, value) {
   var args = { id: id, name: name, value: value };
   return BrisaAPI.SendRequest('Group:setting', args, null, false);
+};
+
+
+BrisaAPI.Role = function(state) { this.data = state;};
+
+BrisaAPI.Role.create = function(name, password) {
+  var args = { name: name, password: password };
+  return BrisaAPI.SendRequest('Role:create', args, BrisaAPI.Role, false);
+};
+
+BrisaAPI.Role.all = function() {
+  var args = {  };
+  return BrisaAPI.SendRequest('Role:all', args, BrisaAPI.Role, true);
+};
+
+BrisaAPI.Role.destroy = function(id) {
+  var args = { id: id };
+  return BrisaAPI.SendRequest('Role:destroy', args, null, false);
+};
+
+BrisaAPI.Role.token = function(id, password, exp) {
+  var args = { id: id, password: password, exp: exp };
+  return BrisaAPI.SendRequest('Role:token', args, null, false);
 };
 
 
@@ -225,6 +280,11 @@ BrisaAPI.Entry.prototype.created_at = function(new_val) {
 BrisaAPI.Entry.prototype.updated_at = function(new_val) {
   if (new_val !== undefined) this.data['updated_at'] = new_val;
   return this.data['updated_at'];
+};
+
+BrisaAPI.Entry.prototype.find = function() {
+  var args = { id: this.data.id }
+  return BrisaAPI.SendRequest('Entry:find', args, null, false, this);
 };
 
 BrisaAPI.Entry.prototype.update = function() {
@@ -372,6 +432,24 @@ BrisaAPI.Group.prototype.shares = function() {
 BrisaAPI.Group.prototype.setting = function(name, value) {
   var args = { id: this.data.id, name: name, value: value }
   return BrisaAPI.SendRequest('Group:setting', args, null, false);
+};
+
+
+BrisaAPI.Role.prototype.id = function() { return this.data,id }
+
+BrisaAPI.Role.prototype.name = function(new_val) {
+  if (new_val !== undefined) this.data['name'] = new_val;
+  return this.data['name'];
+};
+
+BrisaAPI.Role.prototype.destroy = function() {
+  var args = { id: this.data.id }
+  return BrisaAPI.SendRequest('Role:destroy', args, null, false);
+};
+
+BrisaAPI.Role.prototype.token = function(password, exp) {
+  var args = { id: this.data.id, password: password, exp: exp }
+  return BrisaAPI.SendRequest('Role:token', args, null, false);
 };
 
 

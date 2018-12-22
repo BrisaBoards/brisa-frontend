@@ -9,7 +9,7 @@
         <div class="d-flex" style="cursor: pointer;">
           <slot name="title">
             <div class="flex-grow-1 p-2 noselect" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis">
-              <span style="font-size: 115%;" class="card-title text-info">{{entry.data.title}}</span>
+              <span class="card-title text-info">{{entry.data.title}}</span>
               &nbsp; {{entry.description()}}
             </div>
           </slot>
@@ -48,7 +48,7 @@
       },
       cur_opacity: function() {
         if (this.hovering || this.is_selected)
-          return 0.95;
+          return 0.97;
         return this.opacity;
       },
     },
