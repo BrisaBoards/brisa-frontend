@@ -1,5 +1,6 @@
 <template>
-  <div class="container-fluid">
+  <div class="d-flex" style="width: 100%; height: 100%; overflow: auto;">
+    <div class="container-fluid">
     <div class="row" style="padding-top: 0px;">
       <div class="col-12">
         <brisa-badge-list add_style="padding-top: 5px; margin-right: 5px; border-radius: 0px 0px 5px 5px;" highlight="info" @sel_change="SelectLabel"
@@ -17,14 +18,15 @@
         </div>
         <div v-if="entry.data" :key="entry.data.id" style="" class="mb-1 col-12"
             v-for="(entry, idx) in view.entries">
-          <brisa-entry-card-horiz @delete="OnDelete(entry, idx)" :opacity="0.95" :select="selectEntry" style="xmargin-bottom: 2px;"
-              :selected.sync="sel_entry" :hide_desc="false" :entry="entry">
+          <brisa-entry-card-horiz class="kanban-card" @delete="OnDelete(entry, idx)" :opacity="0.95" :select="selectEntry"
+              :selected="sel_entry" :hide_desc="false" :entry="entry">
           </brisa-entry-card-horiz>
         </div>
         <br/>
       </div>
     </div>
     <br/>
+    </div>
   </div>
 
 </template>

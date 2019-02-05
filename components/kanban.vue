@@ -1,14 +1,15 @@
 <template>
   <div ref="kanban-main" class="" :style="'height: 100%; width: 100%; position: absolute; vertical-align: top; white-space: nowrap;'">
 
-    <div class="mb-3" v-for="lane in lanes()">
+    <div class="mb-3" v-for="(lane, lane_idx) in lanes()">
       <div v-if="lane.title">
-        <div class="mt-2 p-2" style="border-radius: 0 20px 20px 0; display: inline-block; background-color: rgba(255,255,255,0.90)">
+        <div class="mt-2 pl-3 p-2" style="border-radius: 0 20px 20px 0; display: inline-block; background-color: rgba(255,255,255,0.90)">
         <span style="font-size: 115%;" class="m-0 text-dark">{{lane.title}}&nbsp;</span>
         </div>
       </div>
-      <brisa-card :key="group.unique_id" v-if="group.lane_id == lane.unique_id" class="ml-3 mt-3" :opacity="0.85" color="white" style="position: relative; white-space: normal; vertical-align: top; width: 275px; border: 0; display: inline-block"
-          v-for="(group,idx) in kanban.groups">
+      <brisa-card :key="group.unique_id" xv-if="group.lane_id == lane.unique_id" class="ml-2 mt-3" :opacity="0.85" color="white"
+          style="position: relative; white-space: normal; vertical-align: top; width: 300px; border: 0; display: inline-block"
+          v-for="(group,idx) in lane.groups">
         <div class="text-dark p-2 mb-1">
           <h4 class="m-0 p-2 rounded" style="background-color: rgba(255,255,255,0.3); margin: 0px; padding: 0px;">{{group.title}}</h4>
         </div>
@@ -16,9 +17,9 @@
         <draggable :key="'drag' + group.unique_id" ref="draggable" style="padding-bottom: 30px;" @add="UpdateEntry"
             @end="UpdateGroups" v-model="sorted_groups[group.unique_id]"
             :data-kbgroup="group.unique_id" :options="{dataIdAttr: group.unique_id, group: 'kbgroup', handle: '.kblist-target'}">
-          <div :key="ent + '_' + idx" class="kblist-target m-1 mt-2" :data-ent="ent" style="position: relative;"
+          <div :key="ent + '_' + idx" class="kblist-target m-0 mt-1" :data-ent="ent" style="position: relative;"
               v-if="entry_dict[ent]" v-for="(ent, idx) in sorted_groups[group.unique_id]">
-            <brisa-entry-card @delete="OnDelete(entry_dict[ent], idx, group.unique_id)" wrapper="card-body-sm" :select="onSelect" margin="1px" :selected.sync="selected_entry" :hide_desc="true" :entry="entry_dict[ent]">
+            <brisa-entry-card class="kanban-card" @delete="OnDelete(entry_dict[ent], idx, group.unique_id)" wrapper="card-body-sm" :select="onSelect" margin="1px" :selected.sync="selected_entry" :hide_desc="true" :entry="entry_dict[ent]">
               <span slot="title">{{entry_dict[ent] ? entry_dict[ent].title() : 'No title for ' + ent}}</span>
             </brisa-entry-card>
           </div>
@@ -34,24 +35,25 @@
       <brisa-card key="new" :opacity="0.7" class="ml-2 mt-3" style="vertical-align: top; display: inline-block">
         <div style="padding: 10px; text-align: center;">
           <a @click.prevent="ShowAddGroup(lane.unique_id)" href="#" v-if="add_group != lane.unique_id">
-            <i class="fa fa-plus"></i>
+            <i class="fa fa-plus"></i> Group
           </a>
           <div v-else>
           <input :ref="'new_group_' + lane.unique_id" class="form-control form-control-sm"
-            v-model="new_group" @keydown.esc="add_group=false" @keypress.enter="AddGroup(lane.unique_id)">
+            v-model="new_group" @keydown.esc="add_group=false" @keypress.enter="AddGroup(lane_idx)">
           <button class="btn btn-warning btn-sm" @click="add_group = false" style="width: 100%">Cancel</button>
           </div>
         </div>
       </brisa-card>
     </div>
 
-    <div v-if="false">
-      <div v-if="!show_new_lane" class="m-3" style="display: inline-block">
-        <button @click="show_new_lane = true" class="btn btn-sm btn-secondary"><i class="fa fa-plus"></i> New Lane</button>
-      </div>
-      <div v-else="show_new_lane" class="m-3" style="display: inline-block">
-        <input v-model="new_lane" @keydown.esc="show_new_lane = false" class="form-control form-control-sm bg-light" style="display: inline-block; max-width: 150px;"> <button @click="AddLane" class="btn btn-sm btn-secondary"><i class="fa fa-plus"></i> &nbsp;Add Lane</button>
-      </div>
+    <div class="mt-5 p-2" style="border-radius: 0 20px 20px 0; display: inline-block; background-color: rgba(255,255,255,0.90)">
+    <div v-if="!show_new_lane" class="" style="display: inline-block">
+      <button @click="show_new_lane = true" class="btn btn-sm btn-link"><i class="fa fa-plus"></i> Add Lane</button>
+    </div>
+    <div v-else="show_new_lane" class="" style="display: inline-block">
+      <input v-model="new_lane" @keydown.esc="show_new_lane = false" class="form-control form-control-sm bg-light" style="display: inline-block; max-width: 150px;">
+      <button @click="AddLane" class="btn btn-sm btn-link"><i class="fa fa-plus"></i> &nbsp;Add Lane</button>
+    </div>
     </div>
   </div>
 </template>
@@ -81,12 +83,11 @@
     methods: {
       AddLane: function() {
         var kanban = this.entry.data.metadata._kanban;
-        var new_lane = {unique_id: Brisa.unique_id(), title: this.new_lane};
+        var new_lane = {unique_id: Brisa.unique_id(), title: this.new_lane, groups: []};
         if (this.kanban.lanes == undefined) this.$set(this.kanban, 'lanes', []);
         this.kanban.lanes.push(new_lane);
-        console.log("new lane", this.kanban.lanes);
-
         this.new_lane = '';
+        this.show_new_lane = false;
       },
       ShowAddGroup: function(lane_id) {
         this.add_group = lane_id;
@@ -104,11 +105,10 @@
           }
         }.bind(this));
       },
-      AddGroup: function(lane_id) {
+      AddGroup: function(lane_idx) {
         var kanban = this.entry.data.metadata._kanban;
-        var new_group = {unique_id: Brisa.unique_id(), title: this.new_group, lane_id: lane_id};
-        if (this.kanban.groups == undefined) this.$set(this.kanban, 'groups',  []);
-        this.kanban.groups.push(new_group);
+        var new_group = {unique_id: Brisa.unique_id(), title: this.new_group};
+        this.kanban.lanes[lane_idx].groups.push(new_group);
         this.kanban.sorted[new_group.unique_id] = [];
         //this.$set(this.sorted_groups, new_group.unique_id, kanban.sorted[new_group.unique_id]);
         this.entry.update().then(() => { this.$set(this, 'sorted_groups', this.entry.data.metadata._kanban.sorted) });
@@ -204,10 +204,13 @@
         }
       },
       lanes: function() {
-        return [{unique_id: null, title: ''}].concat(this.entry.metadata()._kanban.lanes);
+        return this.entry.metadata()._kanban.lanes;
       },
       RTUpdate: function(entry, event) {
+        console.log("KB Update", entry.data.id, event);
         if ((entry.data || {}).id == this.view.parent.data.id) {
+          console.log("Parent updated", entry);
+          this.view.parent = entry;
           this.entry = this.view.parent;
           this.sorted_groups = this.entry.metadata()._kanban.sorted;
           return;
@@ -245,10 +248,24 @@
     },
     created: function() {
       var kb = this.entry.data.metadata._kanban;
-      if (!kb.groups) kb.groups = [];
-      if (!kb.lanes) kb.lanes = [];
-      var group_map = kb.groups.map((g) => { return g.unique_id });
-      var init_g = (kb.groups[0] || {}).unique_id;
+      var groups = [];
+      var group_ids = [];
+      if ((kb.lanes || []).length == 0) kb.lanes = [{title: 'Main', unique_id: Brisa.unique_id(), groups: []}];
+      if (kb.groups) {
+        console.log("Has groups", kb.groups);
+        for (let group of kb.groups) {
+          kb.lanes[0].groups.push(group);
+        }
+        delete kb.groups;
+      }
+      for (let lane of kb.lanes) {
+        if (!lane.groups) lane.groups = [];
+        for (let group of lane.groups) {
+          groups.push(group);
+          group_ids.push(group.unique_id);
+        }
+      }
+      var init_g = (groups[0] || {}).unique_id;
       if (kb.sorted === undefined) kb.sorted = {};
       this.$set(this, 'sorted_groups', kb.sorted);
       for (var i in this.view.entries) {
@@ -264,7 +281,7 @@
             if (kb.sorted[init_g].indexOf(ent.data.id) == -1) kb.sorted[init_g].push(ent.data.id);
           }
         } else {
-          var gidx = group_map.indexOf(g);
+          var gidx = group_ids.indexOf(g);
           if (gidx != -1) {
             if (kb.sorted[g].indexOf(ent.data.id) == -1) kb.sorted[g].push(ent.data.id);
           } else if (init_g) {
@@ -273,8 +290,8 @@
           }
         }
       }
-      for (var i in kb.groups) {
-        var g = kb.groups[i]
+      for (var i in groups) {
+        var g = groups[i]
         if (kb.sorted[g.unique_id] === undefined) kb.sorted[g.unique_id] = [];
         for (var ent_idx in kb.sorted[g.unique_id]) {
           var ent = kb.sorted[g.unique_id][ent_idx];

@@ -8,6 +8,22 @@ body:fullscreen {
   background-color: transparent;
 }
 
+.no-sb-y {
+  overflow-y: -moz-scrollbars-none;
+  -ms-overflow-style: none;
+}
+.no-sb-y::-webkit-scrollbar {
+  width: 0 !important;
+}
+
+.text-of {
+  overflow: hidden; white-space: nowrap; text-overflow: ellipsis;
+}
+
+.kanban-card {
+  -webkit-box-shadow: 0 0;
+  box-shadow: 0 0;
+}
 .header-label-active {
   padding: 5px; border-radius: 3px; background-color: rgba(255, 255, 255, 0.25);
 }

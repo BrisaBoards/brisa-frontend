@@ -32,7 +32,7 @@
             <td>
               <brisa-inline-editor name="Field Type" :updated="UpdatedAttr" :update_ref="[idx, 'field_type']" 
                 :enum_list="Brisa.field_type_arr" val_type="enum"
-                :disp_value.sync="Brisa.field_types[field.field_type]" :keyed_value="field.field_type"></brisa-inline-editor>
+                :value="Brisa.field_types[field.field_type]" :keyed_value="field.field_type"></brisa-inline-editor>
             </td>
             <td style="font-family: monospace">{{field.id}}</td>
           </tr>

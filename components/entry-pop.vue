@@ -16,6 +16,16 @@
           <brisa-inline-editor name="Title" :updated="UpdatedAttr" update_ref="title" val_type="string" :value="entry.title()" wrapper="h4"></brisa-inline-editor>
         </div>
       </div>
+      <div v-if="confirm_delete" class="text-center bg-light rounded border p-2 text-danger" style="z-index: 1; position: absolute; max-width: 100%; width: 300px; right: 0px">
+        <h3>Delete Card?</h3>
+        <p>
+          Note: If the card includes a Kanban, Sheet, etc, the items within will 
+          <strong>not</strong> be deleted.
+        </p>
+        <button @click="confirm_delete = false" class="btn btn-outline-primary">Cancel</button>
+        <button @click="$emit('delete')" class="btn btn-danger">Yes, Delete</button>
+      </div>
+
       <div>
         <div class="m-0 mb-4 pl-3 pt-1 pb-1 border-primary" style="display: inline-block; background-color: rgba(200,225,255,0.7); border-radius: 20px;">
           <span v-for="tag in entry.tags()" class="border-primary bg-light text-primary" style="font-size: 90%; border-radius: 8px; padding: 3px; margin: 1px;">
@@ -26,55 +36,9 @@
           </span>
         </div>
       </div>
-      <div v-if="confirm_delete" class="text-danger">
-        <h3>Are you sure you want to delete this card?</h3>
-        <p>
-          Note: If the card includes a Kanban, Sheet, etc, the items within will 
-          <strong>not</strong> be deleted.
-        </p>
-        <button @click="confirm_delete = false" class="btn btn-info">Cancel</button>
-        <button @click="$emit('delete')" class="btn btn-warning">Yes, Delete</button>
-      </div>
 
-      <brisa-inline-editor name="Description" :updated="UpdatedAttr" update_ref="description" val_type="text" :value="entry.description()" wrapper="div"></brisa-inline-editor>
-      <br/>
-
-      <button @click="show_expand = !show_expand" class="btn btn-outline-primary btn-lg w-100"><i class="fa fa-plus"></i> &nbsp;Expand Card</button>
-
-      <div v-if="show_expand" class="border border-secondary p-3 border-top-0 ml-2 mr-2 mb-3" style="border-radius: 0 0 10px 10px">
-        <transition name="fade-fast">
-          <div v-if="show_board == null">
-            <div class="row " style="font-size: 115%">
-              <div class="col-12 col-md-6">
-                <button href="#" @click.prevent="SelectBoard(cls.cls, cls.name)" style="display: block;" class="btn btn-secondary w-100 p-2 mt-1 text-info"
-                    v-if="class_list().indexOf(cls.cls) == -1"
-                    v-for="cls in Brisa.ui_classes">
-                  <i :class="'fas ' + cls.icon"></i> {{cls.name}}
-                </button>
-              </div>
-              <div class="col-12 col-md-6">
-                <a href="#" @click.prevent="AddModel(model.unique_id())" style="display: block;" class="p-2 mt-1"
-                    v-if="class_list().indexOf(model.unique_id()) == -1" v-for="model in models">
-                  {{model.title()}}
-                </a>
-              </div>
-            </div>
-          </div>
-          <div v-else>
-            <h3>Add {{show_board.label}}</h3>
-            <div>Tags:
-            <input v-model="new_board_tags" class="form-control form-control-sm" placeholder="Tags (comma separated)"></div>
-            <div>Classes:
-              <div v-for="model in models">
-                <label>
-                <input v-model="new_board_classes" :value="model.unique_id()" type="checkbox"> {{model.title()}}
-                </label>
-              </div>
-            </div>
-            <button @click="AddBoard" class="btn btn-lg btn-info">Create</button>
-            <button @click="show_board = null" class="btn btn-lg btn-warning">Cancel</button>
-          </div>
-        </transition>
+      <div class="p-1" style="background-color: rgba(0,0,0,0.02);">
+      <brisa-inline-editor name="Description" :updated="UpdatedAttr" update_ref="description" val_type="text" :value="entry.data.description" wrapper="div"></brisa-inline-editor>
       </div>
 
       <div>
@@ -104,9 +68,72 @@
           </brisa-inline-editor>
         </div>
       </div>
+
+      <div @click.stop class="card-body">
+        <h4>Comments</h4>
+        <div v-if="comments !== null">
+          <div class="xtable-active mb- p-" v-for="comment in comments">
+            <div class="mb-1 p-1 pl-2" v-html="Brisa.formatText(comment.comment())"></div>
+            <div class="mb-3 p-1 pl-2 pr-2 table-active text-" style="border-radius: 8px; display: inline-block; font-size: 80%">by {{comment.data.user}} <span class="text-muted">on {{comment.stamp}}</span></div>
+          </div>
+        </div>
+
+        <div v-if="!add_comment">
+          <button @click="OpenComment" key="add_cmt" class="btn btn-link btn-sm">Add Comment</button>
+          <transition name="fade">
+          <div style="display: inline-block; position: absolute;" v-if="comments === null"><i class="fa fa-spinner fa-spin"></i></div>
+          </transition>
+        </div>
+        <div v-else>
+          <textarea ref="new_comment" class="form-control" rows="4"></textarea>
+          <button @click="AddComment" class="mt-1 mr-1 btn btn-sm btn-outline-primary">Add</button>
+          <button @click="add_comment = false" class="mt-1 btn btn-sm btn-outline-danger">Cancel</button>
+        </div>
+      </div>
+
     </div>
-    <div @click.stop class="card-footer clearfix">
-      <div style="display: inline-block"></div>
+
+      <div @click.stop v-if="show_expand" class="border border-secondary p-3 border-top-0 ml-2 mr-2 mb-0" style="border-radius: 10px 10px 0px 0px">
+        <transition name="fade-fast">
+          <div v-if="show_board == null">
+            <div class="row " style="font-size: 115%">
+              <div class="col-12 col-md-6">
+                <button href="#" @click.prevent="SelectBoard(cls.cls, cls.name)" style="display: block;" class="btn btn-secondary w-100 p-2 mt-1 text-info"
+                    v-if="class_list().indexOf(cls.cls) == -1"
+                    v-for="cls in Brisa.ui_classes">
+                  <i :class="'fas ' + cls.icon"></i> {{cls.name}}
+                </button>
+              </div>
+              <div class="col-12 col-md-6">
+                <a href="#" @click.prevent="AddModel(model.unique_id())" style="display: block;" class="p-2 mt-1"
+                    v-if="class_list().indexOf(model.unique_id()) == -1" v-for="model in models">
+                  {{model.title()}}
+                </a>
+              </div>
+            </div>
+          </div>
+          <div v-else>
+            <h3>Add {{show_board.label}}</h3>
+            <div>Tags:
+            <input v-model="new_board_tags" class="form-control form-control-sm" placeholder="Tags (comma separated)"></div>
+            <div>Classes:
+              <div v-for="model in models">
+                <label>
+                <input v-model="new_board_classes" :value="model.unique_id()" type="checkbox"> {{model.title()}}
+                </label>
+              </div>
+            </div>
+            <button @click="AddBoard" class="btn btn-lg btn-primary">Create</button>
+            <button @click="show_board = null" class="btn btn-lg btn-outline-warning">Cancel</button>
+          </div>
+        </transition>
+      </div>
+
+    <div @click.stop class="card-footer clearfix mt-0">
+      <div style="display: inline-block">
+
+      <button @click="show_expand = !show_expand" class="btn btn-xs btn-link"><i class="fa fa-plus"></i> &nbsp;Expand Card</button>
+      </div>
       <div style="display: inline-block;" class="float-right">
         <textarea :value="JSON.stringify(entry.data, null, 2)" rows="10" v-if="show_code" style="border: 2px solid #ccc; border-radius: 2px; font-size: 100%; font-family: monospace; width: 400px; max-width: 90%; position: absolute; transform: translateY(-100%) translateX(-90%);">
           
@@ -130,9 +157,22 @@
         sel_tab: null, confirm_delete: false,
         models: m, show_expand: false,
         show_code: false,
+        comments: null,
+        add_comment: false,
       };
     },
     methods: {
+      OpenComment: function() {
+        this.add_comment = true;
+        this.$nextTick(function() { this.$refs.new_comment.focus() }.bind(this));
+      },
+      AddComment: function() {
+        BrisaAPI.Comment.create({entry_id: this.entry.data.id, comment: this.$refs.new_comment.value}).then(function(r) {
+          r.stamp = (new Date(r.data.created_at)).toLocaleString();
+          this.comments.push(r);
+          this.add_comment = false;
+        }.bind(this));
+      },
       fmtText: function(str) {
         return Brisa.formatText(str);
       },
@@ -161,10 +201,11 @@
       },
       AddModel: function(model) {
         this.entry.edit_class(model, {}).then(function(r) {
+          this.show_expand = false;
         }.bind(this));
       },
       SelectBoard: function(btype, label) {
-        this.new_board_tags = this.entry.title() + ' ' + label;
+        this.new_board_tags = this.entry.data.id + '-' + label;
         this.new_board_classes = [];
         this.show_board = {type: btype, label: label};
       },
@@ -175,6 +216,7 @@
         if (tags.length == 0) tags = null;
         this.entry.edit_class(this.show_board.type, {classes: this.new_board_classes, tags: tags});
         this.show_board = null;
+        this.show_expand = false;
       },
       classes: function() {
         return (this.entry.classes() || []).map(function(cls) {
@@ -189,11 +231,19 @@
     },
     mounted: function() {
       $(this.$refs.add_btn).dropdown();
+      Brisa.cache.get('Comments', this.entry.data.id).then(function(r) {
+        for (let cmt of r) {
+          cmt.stamp = (new Date(cmt.data.created_at)).toLocaleString();
+        }
+        this.comments = r;
+      }.bind(this));
     },
     computed: {
       entryTags: function() {
         return (this.entry.tags() || []).join(", ");
       },
+    },
+    created: function() {
     },
   });
 

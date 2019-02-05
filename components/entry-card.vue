@@ -5,7 +5,7 @@
 
       <brisa-popup
         :show.sync="is_selected"
-        wrap_style="cursor: default; width: 98vw; padding-left: 10px; padding-right: 10px;"
+        wrap_style="cursor: default; padding-left: 10px; padding-right: 10px;"
         >
         <brisa-entry-pop @delete="$emit('delete')" v-if="selected" slot="popup" :entry="entry" @on-close="onClick"></brisa-entry-pop>
 
@@ -22,10 +22,13 @@
       <div v-if="!hide_desc" class="card-bodyx text-muted entry-section" style="position: relative; max-height: 75px; cursor: pointer; overflow: hidden;'">
         <p class="" v-html="fmtText(entry.description())"></p>
       </div>
-    </div>
     <div>
       <button v-for="uit in Brisa.ui_types" @mousedown.stop @touchstart.stop @click.stop="Brisa.OpenView(entry, uit)"
-          v-if="entry.metadata()[uit.cls]" class="btn btn-round-xs btn-outline-primary ml-2 mb-2"><i :class="'fa ' + uit.icon"></i> {{uit.name}}</button>
+          v-if="entry.metadata()[uit.cls]" class="btn btn-round-xs btn-outline-primary mt-2 ml-1 mb-2"><i :class="'fa ' + uit.icon"></i> {{uit.name}}</button>
+      <div class="p-1 noselect text-primary xfloat-right" style="display: inline-block; opacity: 0.75" v-if="entry.comment_count() > 0">
+        <i class="far fa-comments"></i> {{entry.comment_count()}}
+      </div>
+    </div>
     </div>
   </brisa-card>
 

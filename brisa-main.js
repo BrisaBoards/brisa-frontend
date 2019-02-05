@@ -17,6 +17,14 @@ export default function() {
     key: function(entry_id) { return entry_id },
     lookup: function(entry_id) { return BrisaAPI.Entry.find(entry_id) },
   });
+  Brisa.cache.Register('Comments', {
+    key: function(entry_id) { return entry_id },
+    lookup: function(entry_id) { return BrisaAPI.Comment.all(entry_id) },
+  });
+  Brisa.cache.Register('Comment', {
+    key: function(comment_id) { return comment_id },
+    lookup: function(cmt) { return BrisaAPI.Comment.find(cmt) },
+  });
   Brisa.messager = new BrisaMessager(Brisa.cache, Brisa.views);
 
   if (process.env.BACKEND) {
@@ -69,17 +77,18 @@ export default function() {
   Brisa.onMessage = function(data) {
     data.stamp = (new Date()).getTime();
     if (data.m == 'sid') {
-      console.log("Got session id", data.sid)
       BrisaAPI._include.sid = data.sid;
       return;
     } else if (data.m == 'ent') {
+      Brisa.messager.onMessage(data);
+    } else if (data.m == 'cmt') {
       Brisa.messager.onMessage(data);
     }
   };
   Brisa.socketURL = function() {
     var full_path = BrisaAPI._api_path;
     if (full_path.startsWith('/')) {
-      full_path = document.documentURI + full_path;
+      full_path = document.documentURI + full_path.replace(/^\//, '');
     }
     full_path = full_path + '/updates?auth_token=' + BrisaAPI._include.auth_token;
     return full_path.replace(/^http/, 'ws');
@@ -130,9 +139,8 @@ export default function() {
     return BrisaAPI.Entry.create(entry);
   };
   Brisa.models = [];
-  Brisa.settings = {main_top: 48, header_height: 48, height: window.innerHeight};
+  Brisa.settings = {size: 'lg', main_top: 48, header_height: 48, height: window.innerHeight};
   Brisa.group_settings = {};
-  $(window).on('resize', function(r) { Brisa.settings.height = window.innerHeight });
   Brisa.current_view = null;
   Brisa.CurrentViewIdx = function() {
     for (var i in Brisa.views) {
@@ -143,7 +151,6 @@ export default function() {
     if (Brisa.views[idx]) {
       var view_idx = Brisa.CurrentViewIdx();
       var rem = Brisa.views.splice(idx,1);
-      console.log("CloseView", view_idx, idx, Brisa.current_view, rem[0]);
       if (Brisa.current_view == rem[0]) Brisa.current_view = Brisa.views[view_idx-1];
     } else { console.log("No view", idx); }
   };
@@ -326,12 +333,22 @@ export default function() {
 
   // Token refresh: 30m * 60s * 1000ms
   Brisa.token_refresh_interval = 30 * 60 * 1000;
-  
+  Brisa.onResize = function() {
+    Brisa.settings.height = window.innerHeight;
+    Vue.set(Brisa.settings, 'width', window.innerWidth);
+    if (Brisa.settings.size == 'sm') return;
+    if (Brisa.settings.width >= 768) {
+      Vue.set(Brisa.settings, 'size', 'lg');
+    } else {
+      Vue.set(Brisa.settings, 'size', 'sm');
+    }
+  };
+  $(window).on('resize', function(r) { Brisa.onResize() });
   $(document).ready(function() {
+    Brisa.onResize();
     BrisaAPI._include.auth_token = localStorage.getItem('brisa-token');
     Brisa.theme = {data: {setting: { image: 'backgrounds/breeze.jpg'}}};
     Brisa.models = [];
-    Brisa.settings = {};
     Brisa.app = new Vue({el: '#brisa-container',
       components: {'brisa-main': brisa_main_component},
       data: {Brisa: Brisa, view: Brisa.current_view},

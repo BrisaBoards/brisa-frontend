@@ -15,6 +15,8 @@ import BrisaDashboard from './components/dashboard.vue';
 import BrisaKanban from './components/kanban.vue';
 import BrisaWhiteboard from './components/whiteboard.vue';
 import BrisaLogin from './components/login.vue';
+import LayoutSm from './components/layout-sm.vue';
+import LayoutLg from './components/layout-lg.vue';
 import Draggable from 'vuedraggable';
 
 Vue.component('draggable', Draggable);
@@ -33,6 +35,8 @@ Vue.component('brisa-dashboard', BrisaDashboard);
 Vue.component('brisa-whiteboard', BrisaWhiteboard);
 Vue.component('brisa-kanban', BrisaKanban);
 Vue.component('brisa-login', BrisaLogin);
+Vue.component('layout-sm', LayoutSm);
+Vue.component('layout-lg', LayoutLg);
 
 BrisaAPI.api = process.env.USE_API;
 console.log("Init - API", process.env.USE_API, BrisaAPI.api);

@@ -29,9 +29,6 @@
         Brisa.AddView('Dashboard', 'brisa-dashboard', {tags: [], classes: []}, null, [], group_id);
         this.show_menu = false;
       },
-      SidebarClicked: function() {
-        if (this.show_menu && Brisa.settings.size == 'sm') this.show_menu = false;
-      },
       InitTags: function(focus) {
         if (this.view) {
           this.new_entry_tags = this.view.ctx.tags.join(", ");
@@ -86,16 +83,13 @@
   };
 </script>
 <template>
-  <component :show_sidebar="show_menu" :is="Brisa.settings.size == 'sm' ? 'layout-sm' : 'layout-lg'">
-    <transition name="fade" slot="content">
-    <brisa-login v-if="!Brisa.user.logged_in"></brisa-login>
-    </transition>
-
-    <transition name="fade" slot="background">
+  <div class="" style="height: 100%;">
+    <transition name="fade">
       <div :key="background.style" :class="'background-block ' + background.classes" :style="background.style"></div>
     </transition>
 
-    <brisa-header slot="header" v-show="Brisa.user.logged_in" :Brisa="Brisa" ref="header" @toggle_settings="show_settings = !show_settings">
+    <div style="height: 100%; display: flex; flex: 1; align-items: stretch; flex-direction: column">
+    <brisa-header v-show="Brisa.user.logged_in" :Brisa="Brisa" ref="header" @toggle_settings="show_settings = !show_settings">
       <template slot="left_bar">
         <div :key="Brisa.current_view ? Brisa.current_view.title : ''" class="m-2" style="xborder: 1px dotted rgba(0,0,0,0.15); position: relative; border-radius: 10px; overflow: hidden">
           <div class="bg-secondary" style="z-index: -1; opacity: 0.1; position: absolute; width: 100%; height: 100%"></div>
@@ -118,20 +112,29 @@
       </div>
     </transition>
 
-    <transition name="fade" slot="sidebar">
-      <Sidebar :expanded="show_menu" v-if="true || show_menu" @toggle-menu="SidebarClicked"></Sidebar>
-    </transition>
+    <div v-if="show_settings" class="row m-0 p-0" style="flex-grow: 1;">
+      <brisa-settings @close="show_settings=false"></brisa-settings>
+    </div>
 
-    <transition v-if="Brisa.user.logged_in" name="fade-fast" mode="out-in" slot="content">
+    <transition v-if="Brisa.user.logged_in" name="fade-fast" mode="out-in">
+      <div style="position: relative; flex-grow: 1; width: 100%; overflow: auto;">
+      <transition name="fade">
+        <Sidebar v-if="show_menu" @toggle-menu="show_menu = false"></Sidebar>
+      </transition>
 
-      <brisa-settings @close="show_settings = false;" v-if="show_settings"></brisa-settings>
-      <keep-alive :max="3" v-else>
+      <keep-alive :max="3">
       <component :key="view.unique_id"  style="flex-grow: 1;" :is="view.component"
           :Brisa="Brisa" :view="view" v-if="!show_settings && view && view.component">
       </component>
       </keep-alive>
+      </div>
     </transition>
 
-  </component>
+    <transition name="fade">
+    <brisa-login v-if="!Brisa.user.logged_in"></brisa-login>
+    </transition>
+
+  </div>
+  </div>
 </template>
 

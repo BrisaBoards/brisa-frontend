@@ -6,6 +6,7 @@
   "author": "",
   "homepage": "",
   "dependencies": {
+    "actioncable": "^5.2.2",
     "vuedraggable": "^2.16.0"
   },
   "devDependencies": {

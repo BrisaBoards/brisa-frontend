@@ -6,10 +6,10 @@
   <meta charset="utf-8">
   <link rel="stylesheet" href="3rdparty/<%= process.env.BS_THEME || 'materia.min.css' %>">
   <link rel="stylesheet" href="brisa.css">
-  <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet">
  </head>
 
- <body style="height: 100%;background-color: transparent; font-family: 'Source Sans Pro'; font-size: medium;">
+ <body style="height: 100%;background-color: transparent; font-family: 'Open Sans'; font-size: medium;">
 
   <script src="3rdparty/jquery-3.3.1.min.js"></script>
   <script src="3rdparty/popper.min.js"></script>
@@ -17,10 +17,10 @@
 
   <script src="3rdparty/Sortable.min.js"></script>
   <% if (!process.env.BACKEND) { %>
-  <script src="idb.js?1" type="text/javascript" charset="utf-8"></script>
+  <script src="idb.js?2" type="text/javascript" charset="utf-8"></script>
   <script src="brisa-idb-backend.js?1" type="text/javascript" charset="utf-8"></script>
   <% } %>
-  <script src="brisa-api.js?1" type="text/javascript" charset="utf-8"></script>
+  <script src="brisa-api.js?3" type="text/javascript" charset="utf-8"></script>
   <script defer src="fontawesome/js/all.min.js"></script>
 
   <div id="brisa-container">

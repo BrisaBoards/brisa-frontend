@@ -69,7 +69,7 @@
     <brisa-card style="width: 100%;" :opacity="0.95">
       <div class="card-body m-3" style="padding: 10px;">
         <div>
-          <button @click="$emit('close')" class="float-right btn btn-lg btn-primary">Close</button>
+          <button @click="$emit('close')" class="float-right btn btn-lg btn-link text-info"><i class="fa fa-times"></i></button>
         <h4 class="card-title">Settings</h4>
         </div>
         <div class="nav nav-tabs">

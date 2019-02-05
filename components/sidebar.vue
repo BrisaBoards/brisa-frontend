@@ -1,9 +1,9 @@
 <template>
-  <div class="text-light" style="display: inline-block; z-index: 5000; position: absolute; bottom: 0px; top: 0; width: 375px; max-width: 90%;">
-    <div class="bg-dark" style="xborder-radius: 0px 5px 20px 0px; z-index: -1; opacity: 0.97; position: absolute; width: 100%; height: 100%;"></div>
-    <div v-if="group" class="m-3">
+  <div class="xtext-light w-100 no-sb-y" style="display: inline-block; z-index: 5000; position: relative; height: 100%; width: 100%;">
+    <div class="bg-light" style="z-index: -1; opacity: 0.95;  position: absolute; top:0; width: 100%; height: 100%;"></div>
+    <div key="sb-group" v-if="group && expanded" class="m-3">
       <div @click="group = null" style="cursor: pointer; font-size: 150%;" class="p-2 float-right text-info"><i class="fa fa-times"></i></div>
-      <h3>Group: {{group.name()}}</h3>
+      <h3>Group: {{ group.data.name }}</h3>
       <div>
         <h4>Access</h4>
         <div v-for="share in group.data.access">
@@ -24,23 +24,41 @@
       </div>
     </div>
 
-    <div v-else>
-    <button @click="Brisa.toggleFullScreen" class="btn btn-sm btn-outline-secondary ml-1"><i class="fa fa-arrows-alt"></i> Fullscreen</button>
-    <div class="bg-transparent text-white m-0 p-2 pl-3 pr-3" v-for="group in Brisa.groups">
-      <div @click="GroupSettings(group)" v-if="" style="cursor: pointer;" class="text-light float-right p-1"><i class="fa fa-cog"></i></div>
-      <h4 v-if="!Brisa.group_views[group.data.id]" @click="OpenDash(group.data.id)" style="cursor: pointer;" class="text-light noselect">{{group.data.name}}</h4>
-      <h4 v-else class="text-light">{{group.data.name}}</h4>
-      <div @click="Brisa.current_view = view; $emit('toggle-menu')" :class="'p-2 text-light ' + (Brisa.current_view == view ? 'bg-info' : '')"
-          style="border-radius: 18px; cursor: pointer;" v-if="view" v-for="(view, idx) in Brisa.group_views[group.data.id]">
-        <div class="float-right"><button @click.stop="CloseView(group.data.id, idx)" style="font-size: 75%;"class="btn btn-xs p-1 m-0 btn-outline-danger"><i class="fa fa-times"></i></button></div>
-        <i v-if="view.component == 'brisa-dashboard'" class="fa fa-th"></i>
-        <i :class="'fa ' + Brisa.ui_classes[view.component].icon" v-if="Brisa.ui_classes[view.component]"></i>
-        &nbsp; {{view.title}}
+    <div v-else key="sb" class="w-100 no-sb-y" style="height: 100%;">
+      <div v-if="!expanded" class="pt-2" style="width: 100%; text-align: center;">
+        <img style="width: 50%; height: auto;" src="favicon.ico">
+      </div>
+    <div :key="'group_' + group_idx" class="bg-transparent pt-4 w-100" style="xoverflow-x: hidden;" :class="expanded ? 'p-1 pl-1 pr-1' : 'p-0'"
+        v-for="(group, group_idx) in Brisa.groups">
+      <div v-if="expanded" @click="GroupSettings(group)" style="cursor: pointer;" class="xtext-light float-right p-1">
+        <i class="fa fa-cog"></i>
+      </div>
+      <div key="grp-cont" class="mb-1 pl-1 pr-1" style="text-align: left; white-space: nowrap; xoverflow: hidden;">
+      <h4 v-if="!Brisa.group_views[group.data.id]" :style="expanded ? '' : 'font-size: 100%;'" @click="OpenDash(group.data.id)" style="cursor: pointer;" class="text-info text-of mb-0 noselect">{{group.data.name}}</h4>
+      <h4 v-else :style="expanded ? '' : 'font-size: 100%;'" class="mb-0 text-of text-info noselect">{{group.data.name}}</h4>
+      </div>
+      <div @mouseover="onHover(view.unique_id, true)" @mouseout="onHover(view.unique_id, false)" @click="Brisa.current_view = view; $emit('toggle-menu')" :class="'p-2 w-100 ' + (Brisa.current_view == view ? 'bg-primary text-light' : '')"
+          style="position: relative; cursor: pointer; xoverflow: hidden;" :style="expanded ? 'xborder-radius: 18px;' : 'text-align: center;'" v-if="view" v-for="(view, idx) in Brisa.group_views[group.data.id]">
+        <transition name="fade-fast">
+        <div @click.stop v-if="!expanded && hover_view == view.unique_id"
+            style="background-color: #f8f8f8; text-align: left; cursor: default; z-index: 5000; left: 99%; position: absolute; max-width: 200px; overflow: hidden;"
+            class="xborder p-0 rounded text-dark">
+          <button @click="CloseView(group.data.id, idx)" class="btn m-0 btn-sm btn-outline-danger">Close</button>
+          <button v-if="false" class="btn btn-sm btn-link">Pin</button>
+        </div>
+        </transition>
+        <div class="" :style="expanded ? '' : 'font-size: 75%;'" style="display: inline-block; width: 100%; overflow: hidden;">
+          <div class="float-right" v-if="expanded"><button @click.stop="CloseView(group.data.id, idx)" style="font-size: 75%; border: 0px; box-shadow: 0 0 0" class="btn btn-xs p-1 m-0 btn-outline-danger"><i class="fa fa-times"></i></button></div>
+          <i v-if="view.component == 'brisa-dashboard'" class="fa fa-th"></i>
+          <i :class="'fa ' + Brisa.ui_classes[view.component].icon" v-if="Brisa.ui_classes[view.component]"></i>
+          <span style="white-space: nowrap; text-overflow: ellipsis;" v-if="!expanded"><br/>{{view.title}}</span>
+          <span style="white-space: nowrap; text-overflow: ellipsis;" v-else>{{view.title}}</span>
+        </div>
       </div>
     </div>
 
-    <button v-if="!new_group" @click="new_group = true" class="btn btn-link text-primary w-100"><i class="fa fa-plus"></i> &nbsp;New Group</button>
-    <div v-else class="p-2">
+    <div v-if="expanded" style="width: 100%;">
+    <div v-if="new_group" class="p-2">
       <input ref="new_group" class="form-control bg-light p-2" placeholder="Group Name">
       <button @click="CreateGroup" class="mt-1 btn btn-sm btn-primary w-100">Create</button>
       <button @click="new_group = false" class="mt-1 btn btn-sm btn-secondary text-danger w-100">Cancel</button>
@@ -48,24 +66,37 @@
         Error creating group: {{group_error}}
       </div>
     </div>
-    <button @click="Brisa.logout" class="btn btn-link text-light w-100 mt-2">Log Out {{ Brisa.user.alias }} &nbsp;<i class="fa fa-user"></i></button>
+    
+    <button @click="new_group = true" class="btn btn-sm btn-link w-100"><i class="fa fa-plus"></i> &nbsp;New Group</button>
+    <button @click="Brisa.toggleFullScreen" class="btn btn-sm btn-link w-100"><i class="fa fa-arrows-alt"></i> Fullscreen</button>
+    <button @click="Brisa.logout" class="btn btn-link btn-sm w-100"><i class="fa fa-user"></i>&nbsp; Log Out {{ Brisa.user.alias }}</button>
+    </div>
     </div>
   </div>
 </template>
 
 <script>
   export default {
-    props: [],
+    props: ['expanded'],
     data: function() {
       return {
         Brisa: Brisa,
         new_group: false,
+        hover_view: null,
         group_error: null,
         group: null,
         add_share_err: null,
       };
     },
     methods: {
+      onHover: function(uid, is_active) {
+        if (is_active == false && this.hover_view == uid) {
+          this.hover_view = null;
+        } else if (is_active) {
+          this.hover_view = uid;
+        }
+        //console.log("Hover", this.hover_view, uid, is_active);
+      },
       CloseView: function(group_id, idx) {
         var view = Brisa.group_views[group_id].splice(idx, 1)[0];
         if (Brisa.current_view == view) Brisa.current_view = null;

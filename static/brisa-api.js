@@ -1,5 +1,5 @@
 // Brisa javascript client library, Version Brisa0.
-// Auto-generated on 2018-12-21
+// Auto-generated on 2019-01-16
 
 var BrisaAPI = {
   _include: {}
@@ -229,6 +229,34 @@ BrisaAPI.Role.token = function(id, password, exp) {
 };
 
 
+BrisaAPI.Comment = function(state) { this.data = state;};
+
+BrisaAPI.Comment.all = function(entry_id) {
+  var args = { entry_id: entry_id };
+  return BrisaAPI.SendRequest('Comment:all', args, BrisaAPI.Comment, true);
+};
+
+BrisaAPI.Comment.find = function(id) {
+  var args = { id: id };
+  return BrisaAPI.SendRequest('Comment:find', args, BrisaAPI.Comment, true);
+};
+
+BrisaAPI.Comment.create = function(data) {
+  var args = { data: data };
+  return BrisaAPI.SendRequest('Comment:create', args, BrisaAPI.Comment, false);
+};
+
+BrisaAPI.Comment.destroy = function(id) {
+  var args = { id: id };
+  return BrisaAPI.SendRequest('Comment:destroy', args, BrisaAPI.Comment, false);
+};
+
+BrisaAPI.Comment.update = function(id, data) {
+  var args = { id: id, data: data };
+  return BrisaAPI.SendRequest('Comment:update', args, BrisaAPI.Comment, false);
+};
+
+
 
 BrisaAPI.Entry.prototype.id = function() { return this.data,id }
 
@@ -280,6 +308,11 @@ BrisaAPI.Entry.prototype.created_at = function(new_val) {
 BrisaAPI.Entry.prototype.updated_at = function(new_val) {
   if (new_val !== undefined) this.data['updated_at'] = new_val;
   return this.data['updated_at'];
+};
+
+BrisaAPI.Entry.prototype.comment_count = function(new_val) {
+  if (new_val !== undefined) this.data['comment_count'] = new_val;
+  return this.data['comment_count'];
 };
 
 BrisaAPI.Entry.prototype.find = function() {
@@ -450,6 +483,39 @@ BrisaAPI.Role.prototype.destroy = function() {
 BrisaAPI.Role.prototype.token = function(password, exp) {
   var args = { id: this.data.id, password: password, exp: exp }
   return BrisaAPI.SendRequest('Role:token', args, null, false);
+};
+
+
+BrisaAPI.Comment.prototype.id = function() { return this.data,id }
+
+BrisaAPI.Comment.prototype.user_uid = function(new_val) {
+  if (new_val !== undefined) this.data['user_uid'] = new_val;
+  return this.data['user_uid'];
+};
+
+BrisaAPI.Comment.prototype.comment = function(new_val) {
+  if (new_val !== undefined) this.data['comment'] = new_val;
+  return this.data['comment'];
+};
+
+BrisaAPI.Comment.prototype.metadata = function(new_val) {
+  if (new_val !== undefined) this.data['metadata'] = new_val;
+  return this.data['metadata'];
+};
+
+BrisaAPI.Comment.prototype.reply_to = function(new_val) {
+  if (new_val !== undefined) this.data['reply_to'] = new_val;
+  return this.data['reply_to'];
+};
+
+BrisaAPI.Comment.prototype.destroy = function() {
+  var args = { id: this.data.id }
+  return BrisaAPI.SendRequest('Comment:destroy', args, BrisaAPI.Comment, false);
+};
+
+BrisaAPI.Comment.prototype.update = function() {
+  var args = { id: this.data.id, data: this.data }
+  return BrisaAPI.SendRequest('Comment:update', args, null, false, this);
 };
 
 

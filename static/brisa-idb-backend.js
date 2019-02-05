@@ -1,6 +1,6 @@
 var BrisaIDB = function(db) {
   this.db_name = db;
-  this.dbP = idb.open(db, 2, function(upgradeDb) {
+  this.dbP = idb.open(db, 3, function(upgradeDb) {
     switch (upgradeDb.oldVersion) {
       case 0:
         Brisa.brisa_first_run = true;
@@ -9,6 +9,8 @@ var BrisaIDB = function(db) {
         upgradeDb.createObjectStore('user_settings', {keyPath: 'id', autoIncrement: true});
       case 1:
         upgradeDb.createObjectStore('groups', {keyPath: 'id', autoIncrement: true});
+      case 2:
+        upgradeDb.createObjectStore('comments', {keyPath: 'id', autoIncrement: true});
     }
   }.bind(this));
   return this;
@@ -191,6 +193,21 @@ BrisaIDB.action('Entry:edit_class', 'entries', 'custom', function(act, args, res
   });
 });
 
+BrisaIDB.action('Comment:create', 'comments', 'create', function(obj) {
+  obj.data.user_uid = 1;
+  obj.data.created_at = new Date();
+  return obj.data;
+});
+BrisaIDB.action('Comment:update', 'comments', 'update', function(args) {
+  return args.data;
+});
+BrisaIDB.action('Comment:destroy', 'comments', 'destroy', function(args) {
+  return args.id;
+});
+BrisaIDB.action('Comment:all', 'comments', 'iter', function(obj, args) {
+  if (obj.entry_id == args.entry_id) return true;
+  return false;
+});
 BrisaIDB.action('Entry:create', 'entries', 'create', function(obj) {
   if (obj.data.metadata == undefined) obj.data.metadata = {};
   if (!obj.data.group_id) obj.data.group_id = null;

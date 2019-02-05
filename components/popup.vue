@@ -2,7 +2,7 @@
   <div>
     <slot></slot>
 
-    <div ref="popup" :style="' z-index: 100; position: absolute; ' + (show ? '' : 'display: none;') + wrap_style">
+    <div ref="popup" v-if="show" style="z-index: 100; position: absolute;" :style="width_s + (show ? '' : 'display: none;') + wrap_style">
       <slot name="popup"></slot>
     </div>
   </div>
@@ -15,14 +15,21 @@
       'show', 'wrap_style'
     ],
     data: function() {
-      return {width: 400};
+      return {width: 400 };
+    },
+    computed: {
+      width_s: function() {
+        return 'width: ' + this.width + 'px;';
+      }
     },
     watch: {
       show: function(show_val) {
         this.$nextTick(function() {
           if (show_val) {
-            this.width = window.innerWidth;
-            $(this.$refs.popup).offset({left: 0});
+            var cont = Brisa.content;
+            var offset = cont ? $(cont).offset().left : 0;
+            this.width = window.innerWidth - offset - 18;
+            $(this.$refs.popup).offset({left: offset });
           }
         }.bind(this));
       },
