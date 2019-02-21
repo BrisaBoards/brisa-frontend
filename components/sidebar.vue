@@ -37,22 +37,23 @@
       <h4 v-if="!Brisa.group_views[group.data.id]" :style="expanded ? '' : 'font-size: 100%;'" @click="OpenDash(group.data.id)" style="cursor: pointer;" class="text-info text-of mb-0 noselect">{{group.data.name}}</h4>
       <h4 v-else :style="expanded ? '' : 'font-size: 100%;'" class="mb-0 text-of text-info noselect">{{group.data.name}}</h4>
       </div>
-      <div @mouseover="onHover(view.unique_id, true)" @mouseout="onHover(view.unique_id, false)" @click="Brisa.current_view = view; $emit('toggle-menu')" :class="'p-2 w-100 ' + (Brisa.current_view == view ? 'bg-primary text-light' : '')"
+      <div :key="idx + view.unique_id" @mouseover="onHover(view.unique_id, true)" @mouseout="onHover(view.unique_id, false)" @click="Brisa.current_view = view; $emit('toggle-menu')" :class="'p-1 w-100 ' + (Brisa.current_view == view ? 'bg-primary text-light' : '')"
           style="position: relative; cursor: pointer; xoverflow: hidden;" :style="expanded ? 'xborder-radius: 18px;' : 'text-align: center;'" v-if="view" v-for="(view, idx) in Brisa.group_views[group.data.id]">
         <transition name="fade-fast">
         <div @click.stop v-if="!expanded && hover_view == view.unique_id"
-            style="background-color: #f8f8f8; text-align: left; cursor: default; z-index: 5000; left: 99%; position: absolute; max-width: 200px; overflow: hidden;"
-            class="xborder p-0 rounded text-dark">
-          <button @click="CloseView(group.data.id, idx)" class="btn m-0 btn-sm btn-outline-danger">Close</button>
-          <button v-if="false" class="btn btn-sm btn-link">Pin</button>
+            style="white-space: nowrap; text-align: left; cursor: default; z-index: 10000; top: 3px; left: 89%; position: absolute; max-width: 200px; overflow: hidden;"
+            class="border p-1 rounded border-secondary bg-light text-dark">
+          <button @click="CloseView(group.data.id, idx)" class="btn m-0 btn-sm btn-outline-danger p-2"><i class="fa fa-times"></i></button>
+          <button v-if="false" @click="" class="btn m-0 btn-sm p-2 pt-0 pb-0 btn-outline-success"><i class="fa fa-thumbtack"></i></button>
         </div>
         </transition>
-        <div class="" :style="expanded ? '' : 'font-size: 75%;'" style="display: inline-block; width: 100%; overflow: hidden;">
+        <div class="" :style="expanded ? '' : 'xfont-size: 75%;'" style="xwhite-space: nowrap; xtext-align: left; display: inline-block; width: 100%; overflow: hidden;">
           <div class="float-right" v-if="expanded"><button @click.stop="CloseView(group.data.id, idx)" style="font-size: 75%; border: 0px; box-shadow: 0 0 0" class="btn btn-xs p-1 m-0 btn-outline-danger"><i class="fa fa-times"></i></button></div>
-          <i v-if="view.component == 'brisa-dashboard'" class="fa fa-th"></i>
+          <span><i v-if="view.component == 'brisa-dashboard'" class="fa fa-th"></i>
           <i :class="'fa ' + Brisa.ui_classes[view.component].icon" v-if="Brisa.ui_classes[view.component]"></i>
-          <span style="white-space: nowrap; text-overflow: ellipsis;" v-if="!expanded"><br/>{{view.title}}</span>
-          <span style="white-space: nowrap; text-overflow: ellipsis;" v-else>{{view.title}}</span>
+          </span>
+          <br key="small_sep" v-if="!expanded" />
+          <span :style="expanded ? '' : 'font-size: 80%'" style="white-space: nowrap; text-overflow: ellipsis;">{{view.title}}</span>
         </div>
       </div>
     </div>

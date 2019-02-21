@@ -1,5 +1,5 @@
 <template>
-  <brisa-card :color="color" :opacity="opacity" :style="'margin-top: ' + (margin || '10px')">
+  <brisa-card bg_class="bg-light" :color="color" :opacity="opacity" :style="'margin-top: ' + (margin || '10px')">
     <div @click="onClick" style="cursor: pointer;" @mouseover="hovering = true" @mouseout="hovering = false"
         :class="wrapper || 'card-body pl-3 pt-3 pr-3 pb-1'">
 
@@ -7,7 +7,8 @@
         :show.sync="is_selected"
         wrap_style="cursor: default; padding-left: 10px; padding-right: 10px;"
         >
-        <brisa-entry-pop @delete="$emit('delete')" v-if="selected" slot="popup" :entry="entry" @on-close="onClick"></brisa-entry-pop>
+        <brisa-entry-pop :api_ctx="api_ctx" @delete="$emit('delete')" v-if="selected" slot="popup" :entry="entry" @on-close="onClick">
+        </brisa-entry-pop>
 
         <div style="cursor: pointer;">
           <div :style="!hovering ? 'color: #e0e0e0;' : ''"  :class="'float-right clearfix ' + (hovering ? 'text-primary' : 'disabled')">
@@ -23,7 +24,10 @@
         <p class="" v-html="fmtText(entry.description())"></p>
       </div>
     <div>
-      <button v-for="uit in Brisa.ui_types" @mousedown.stop @touchstart.stop @click.stop="Brisa.OpenView(entry, uit)"
+      <div class="p-1 text-primary " style="opacity: 0.75; display: inline-block" v-if="entry.data.assignees.indexOf(Brisa.user.uid) != -1">
+        <i class="fa fa-user-clock"></i>
+      </div>
+      <button v-for="uit in Brisa.ui_types" @mousedown.stop @touchstart.stop @click.stop="Brisa.OpenCtx(entry, uit.cls)"
           v-if="entry.metadata()[uit.cls]" class="btn btn-round-xs btn-outline-primary mt-2 ml-1 mb-2"><i :class="'fa ' + uit.icon"></i> {{uit.name}}</button>
       <div class="p-1 noselect text-primary xfloat-right" style="display: inline-block; opacity: 0.75" v-if="entry.comment_count() > 0">
         <i class="far fa-comments"></i> {{entry.comment_count()}}
@@ -38,7 +42,7 @@
   export default Vue.extend({
     props: [
       'entry', 'selected', 'hide_desc', 'select', 'margin',  'wrapper',
-      'color', 'opacity'
+      'color', 'opacity', 'api_ctx'
     ],
     data: function() {
       return {Brisa: Brisa, hovering: false};

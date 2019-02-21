@@ -5,7 +5,7 @@
     <div :key="entry.data.id" :data-entryid="idx" :ref="'card' + entry.data.id" @mousedown="StartMove" @touchstart="StartMove"
         class="mb-1 mr-2" v-if="entry.data.id != pid" v-for="(entry, idx) in view.entries"
         :style="EntryPos(entry.data.id) + ' width: 200px; position: absolute;'">
-      <brisa-entry-card @delete="OnDelete(entry, idx)" :color.sync="card_bg" :entry="entry" :select="onSelect" :selected.sync="selected_entry">
+      <brisa-entry-card :api_ctx="pid + '-_whiteboard'" @delete="OnDelete(entry, idx)" :color.sync="card_bg" :entry="entry" :select="onSelect" :selected.sync="selected_entry">
       </brisa-entry-card>
     </div>
   </div>

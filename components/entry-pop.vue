@@ -1,14 +1,15 @@
 <template>
-  <brisa-card opacity="0.98" class="mb-1 mr-1" :style="'max-width: 100vw; xwidth: 100vw; xz-index: ' + (zindex ? zindex: 100)">
+  <brisa-card opacity="0.98" bg_class="bg-light" :color="null" class="mb-1 mr-1 xnofocus" :style="'max-width: 100vw; xwidth: 100vw; xz-index: ' + (zindex ? zindex: 100)">
 
-        <div class="float-right">
-          <button class="btn btn-lg btn-outline-danger" style="border-radius: 0px;" @click.stop="confirm_delete = true">
-            <i class="fa fa-1x fa-trash-alt"></i>
-          </button>
-          <button class="btn btn-lg btn-outline-primary ml-1" style="border-radius: 0px;" @click.stop="$emit('on-close')">
-            <i class="fa fa-1x fa-times"></i>
-          </button>
-        </div>
+    <div v-if="!hide_icons" class="float-right">
+      <button class="btn btn-lg btn-outline-danger" style="border-radius: 0px;" @click.stop="confirm_delete = true">
+        <i class="fa fa-1x fa-trash-alt"></i>
+      </button>
+      <button class="btn btn-lg btn-outline-primary ml-1" style="border-radius: 0px;" @click.stop="$emit('on-close')">
+        <i class="fa fa-1x fa-times"></i>
+      </button>
+    </div>
+
     <div class="card-body" @click.stop="noop">
 
       <div class="d-flex clearfix">
@@ -26,10 +27,31 @@
         <button @click="$emit('delete')" class="btn btn-danger">Yes, Delete</button>
       </div>
 
-      <div>
-        <div class="m-0 mb-4 pl-3 pt-1 pb-1 border-primary" style="display: inline-block; background-color: rgba(200,225,255,0.7); border-radius: 20px;">
+      <div class="row ml-0 mr-0 mb-2  p-2" style="background-color: rgba(200,225,255,0.3);">
+        <div class="col-12 col-lg-4 xtext-muted">
+          <div>
+            <small><span v-if="entry_info.creator">By {{entry_info.creator}}</span> <span v-if="entry_info.stamp">on {{entry_info.stamp}}</span></small>
+          </div>
+          <div>
+            <button @click="expand_assign = !expand_assign" class="btn btn-xs btn-link">
+              <span v-if="entry.data.assignees.length == 0">Unassigned</span>
+              <span v-else>Assigned: <span v-for="uid in entry.data.assignees" class="xbg-light ml-1 mr-1">{{ucache[uid] || uid}} </span></span>
+            </button>
+            <div v-if="expand_assign">
+            <div @click="Assign(u.uid, entry.data.assignees.indexOf(u.uid) != -1 ? false : true, idx)" v-for="(u,idx) in assign_list"
+              :class="entry.data.assignees.indexOf(u.uid) != -1 ? 'bg-primary text-light' : 'bg-light text-dark'"
+              style="cursor: pointer; font-size: 75%; display: inline-block" class="mr-1 p-2">
+              {{u.user}}
+            </div>
+            </div>
+            <div>
+            <button @click="ToggleWatch" class="btn btn-xs btn-link">{{entry.data.watchers.indexOf(Brisa.user.uid) != -1 ? "Stop Watching" : "Watch this card" }}</button>
+            </div>
+          </div>
+        </div>
+        <div class="col-12 col-lg-4 " style="display: inline-block; xbackground-color: rgba(200,225,255,0.7); border-radius: 20px;">
           <span v-for="tag in entry.tags()" class="border-primary bg-light text-primary" style="font-size: 90%; border-radius: 8px; padding: 3px; margin: 1px;">
-            {{tag}} <a @click="RemoveTag(tag)"> &nbsp;<span class="fas fa-window-close xtext-danger"></span></a>
+            {{tag}} <a @click="RemoveTag(tag)" style="border-radius: 5px;"> &nbsp;<span class="fas fa-times-circle xtext-danger"></span></a>
           </span>
           <span>
             <input @keypress.enter="AddTag()" ref="new_tag" class="form-control form-control-sm" placeholder="Add tag" style="display: inline-block; width: 125px;">
@@ -43,7 +65,7 @@
 
       <div>
         <div v-if="class_list().indexOf(uitype.cls) != -1" v-for="uitype in Brisa.ui_classes" class="m-2 mt-3" style="display: inline-block">
-          <button @click="Brisa.OpenView(entry, uitype)" class="btn btn-sm btn-outline-primary">Open {{uitype.name}}</button>
+          <button @click="Brisa.OpenCtx(entry, uitype.cls)" class="btn btn-sm btn-outline-primary">Open {{uitype.name}}</button>
         </div>
       </div>
 
@@ -93,38 +115,48 @@
 
     </div>
 
-      <div @click.stop v-if="show_expand" class="border border-secondary p-3 border-top-0 ml-2 mr-2 mb-0" style="border-radius: 10px 10px 0px 0px">
+      <div @click.stop v-if="show_expand" class="border border-secondary p-3 xborder-top-0 ml-2 mr-2 mb-0" style="border-radius: 10px 10px 0px 0px">
         <transition name="fade-fast">
           <div v-if="show_board == null">
             <div class="row " style="font-size: 115%">
-              <div class="col-12 col-md-6">
-                <button href="#" @click.prevent="SelectBoard(cls.cls, cls.name)" style="display: block;" class="btn btn-secondary w-100 p-2 mt-1 text-info"
+              <div class="col-12 col-md-12">
+                <h3 class="mb-3">How would you like to expand this card?</h3>
+                <button @click.prevent="SelectBoard(cls.cls, cls.name)" style="min-width: 120px; xdisplay: block;" class="btn btn-outline-info btn-lg xw-100 p-2 mt-1 mr-2"
                     v-if="class_list().indexOf(cls.cls) == -1"
                     v-for="cls in Brisa.ui_classes">
-                  <i :class="'fas ' + cls.icon"></i> {{cls.name}}
+                  <i style="font-size: 250%;" :class="'fas xfa-2x ' + cls.icon"></i><br/>{{cls.name}}
                 </button>
-              </div>
-              <div class="col-12 col-md-6">
-                <a href="#" @click.prevent="AddModel(model.unique_id())" style="display: block;" class="p-2 mt-1"
+                <button @click.prevent="AddModel(model.unique_id())" style="min-width: 120px;" class="btn btn-outline-primary btn-lg p-2 mt-1 mr-2"
                     v-if="class_list().indexOf(model.unique_id()) == -1" v-for="model in models">
+                  <i style="font-size: 250%;" :class="'far xfa-2x fa-list-alt'"></i><br/>
                   {{model.title()}}
-                </a>
+                </button>
               </div>
             </div>
           </div>
           <div v-else>
             <h3>Add {{show_board.label}}</h3>
-            <div>Tags:
-            <input v-model="new_board_tags" class="form-control form-control-sm" placeholder="Tags (comma separated)"></div>
-            <div>Classes:
+            <div v-if="show_board.opts">
+            <div>
+              Tags:
+              <input v-model="new_board_tags" class="form-control form-control-sm" placeholder="Tags (comma separated)">
+              <small>You can use your own tag (or tags). Make sure it's unique. Or you can enter
+                a label (eg Important) to mirror that label within the board.</small>
+            </div>
+            <div class="mt-3">Models:
+              <br/><small>Any models you select will automatically be applied to cards created within this board.</small>
               <div v-for="model in models">
                 <label>
                 <input v-model="new_board_classes" :value="model.unique_id()" type="checkbox"> {{model.title()}}
                 </label>
               </div>
             </div>
-            <button @click="AddBoard" class="btn btn-lg btn-primary">Create</button>
-            <button @click="show_board = null" class="btn btn-lg btn-outline-warning">Cancel</button>
+            </div>
+            <div v-else>
+              <button @click="show_board.opts = true" class="btn btn-sm btn-link">Advanced...</button>
+            </div>
+            <button @click="AddBoard" class="btn btn-lg btn-outline-primary">Create</button>
+            <button @click="show_board = null" class="btn btn-lg btn-outline-secondary text-dark">Cancel</button>
           </div>
         </transition>
       </div>
@@ -148,11 +180,14 @@
   import Vue from 'vue'
   export default Vue.extend({
     props: [
-      'entry', 'zindex'
+      'entry', 'zindex', 'api_ctx', 'hide_icons'
     ],
     data: function() {
       var m = Brisa.group_models[this.entry.group_id() || null];
       return {Brisa: Brisa, show_board: null,
+        expand_assign: false, assign_list: [], ucache: {},
+        assigned_str: '',
+        entry_info: {stamp: null, creator: null},
         new_board_tags: '', new_board_classes: [],
         sel_tab: null, confirm_delete: false,
         models: m, show_expand: false,
@@ -162,12 +197,33 @@
       };
     },
     methods: {
+      ToggleWatch: function() {
+        var idx = this.entry.data.watchers.indexOf(Brisa.user.uid);
+        var watching = idx != -1;
+        this.entry.watch(!watching).then(function(r) {
+          if (watching)
+            this.entry.data.watchers.splice(idx, 1);
+          else
+            this.entry.data.watchers.push(Brisa.user.uid);
+        }.bind(this));
+      },
+      Assign: function(uid, val, idx) {
+        this.entry.assign(uid, val, this.api_ctx).then(function(r) {
+          if (val)
+            this.entry.data.assignees.push(uid);
+          else {
+            var user_idx = this.entry.data.assignees.indexOf(uid);
+            if (user_idx != -1) this.entry.data.assignees.splice(user_idx, 1);
+          }
+          console.log("Assign", this.entry.data.assignees, uid, val, idx);
+        }.bind(this));
+      },
       OpenComment: function() {
         this.add_comment = true;
         this.$nextTick(function() { this.$refs.new_comment.focus() }.bind(this));
       },
       AddComment: function() {
-        BrisaAPI.Comment.create({entry_id: this.entry.data.id, comment: this.$refs.new_comment.value}).then(function(r) {
+        BrisaAPI.Comment.create({ctx: this.api_ctx, entry_id: this.entry.data.id, comment: this.$refs.new_comment.value}).then(function(r) {
           r.stamp = (new Date(r.data.created_at)).toLocaleString();
           this.comments.push(r);
           this.add_comment = false;
@@ -207,7 +263,7 @@
       SelectBoard: function(btype, label) {
         this.new_board_tags = this.entry.data.id + '-' + label;
         this.new_board_classes = [];
-        this.show_board = {type: btype, label: label};
+        this.show_board = {type: btype, label: label, opts: false};
       },
       AddBoard: function() {
         var tags = this.new_board_tags.split(",").map(function(tag) { return tag.trim() });
@@ -244,6 +300,22 @@
       },
     },
     created: function() {
+      this.entry_info.stamp = (new Date(this.entry.data.created_at)).toLocaleDateString();
+      if (this.entry.data.group_id) {
+        for (var g of Brisa.groups) {
+          if (g.data.id == this.entry.data.group_id) this.assign_list = g.data.access;
+        }
+      } else {
+        this.assign_list = [{uid: Brisa.user.uid, user: Brisa.user.alias}];
+      }
+      for (var u of this.assign_list) {
+        this.ucache[u.uid] = null;
+        let uid = u.uid;
+        Brisa.cache.get('User', uid, false).then(function(r) { this.ucache[uid] = r.data.alias; }.bind(this));
+      }
+      Brisa.cache.get('User', this.entry.data.creator_uid).then(function(r) {
+        this.entry_info.creator = r.data.alias;
+      }.bind(this));
     },
   });
 

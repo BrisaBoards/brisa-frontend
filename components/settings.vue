@@ -125,7 +125,7 @@
             <option>Select Background Style</option>
             <option :value="{image: img.url}" v-for="img in Brisa.background_opts.images">{{img.title}}</option>
             <option :value="{bg_class: cls}" v-for="cls in Brisa.background_opts.classes">{{cls}}</option>
-            <option :value="{color: color}" v-for="color in Brisa.background_opts.colors">{{color}}</option>
+            <option :value="{color: color[1]}" v-for="color in Brisa.background_opts.colors">{{color[0]}}</option>
           </select>
 
           <div v-if="false">

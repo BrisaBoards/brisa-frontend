@@ -8,6 +8,12 @@ body:fullscreen {
   background-color: transparent;
 }
 
+.nofocus {
+  -webkit-box-shadow: none !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
+
 .no-sb-y {
   overflow-y: -moz-scrollbars-none;
   -ms-overflow-style: none;
@@ -21,8 +27,9 @@ body:fullscreen {
 }
 
 .kanban-card {
+  margin: 1px;
   -webkit-box-shadow: 0 0;
-  box-shadow: 0 0;
+  box-shadow: 1px 0px 2px 0px #e8e8f8;
 }
 .header-label-active {
   padding: 5px; border-radius: 3px; background-color: rgba(255, 255, 255, 0.25);

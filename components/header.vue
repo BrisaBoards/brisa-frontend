@@ -8,12 +8,26 @@
     <div class="flex-grow-1"></div>
 
     <div class="m-2" style="white-space: nowrap;">
-      <button v-if="false" @click="toggleFullScreen" class="btn btn-outline-primary text-light btn-round-sm" style="padding-left: 12px; padding-right: 12px;">
-        <i class="fa fa-arrows-alt"></i>
+      <div style="display: inline-block; position: relative;">
+      <button @click="show_notify = !show_notify" style="position: relative; padding-left: 12px; padding-right: 12px;" class="btn btn-outline-primary btn-round-sm text-light nofocus">
+        <i class="fa fa-user"></i>
+        <div v-if="Brisa.notify.unread_count > 0" class="bg-info text-light pl-1 pr-1" style="text-align: center; font-weight: bold; font-size: 80%; border-radius: 10px; padding: 2px; position: absolute; right: 0px; top: 0px;">
+          {{ Brisa.notify.unread_count }}
+        </div>
       </button>
-      <button @click="$emit('toggle_settings')" class="btn btn-outline-primary text-light btn-round-sm" style="padding-left: 12px; padding-right: 12px;">
-        <i class="fa fa-ellipsis-v"></i>
-      </button>
+      <div v-show="show_notify" class="xrounded border border-primary bg-light text-dark" style="z-index: 10; overflow: hidden; white-space: normal; width: 350px; max-width: 100vw; border-radius: 5px; position: absolute; right: 0;">
+        <div class="p-1 clearfix">
+          <div class="float-right">
+          <button key="logout" @click="show_notify = false; Brisa.logout()" class="btn xbtn-sm btn-outline-primary p-1 pl-2 pr-2"><i class="fa fa-sign-out-alt"></i></button>
+          <button @click="$emit('toggle_settings'); show_notify = false;" class="btn xbtn-sm btn-outline-primary p-1 pl-2 pr-2"><i class="fa fa-sliders-h"></i></button>
+          </div>
+          <small>Hello, {{Brisa.user.alias}}!</small>
+        </div>
+        <div style="max-height: 75vh; overflow-y: auto;">
+        <brisa-notification @selected="show_notify = false;" :key="note.data.id" :note="note" v-for="note,idx in Brisa.notify.messages"></brisa-notification>
+        </div>
+      </div>
+      </div>
       &nbsp;
       <slot name="right_bar"></slot>
 
@@ -43,7 +57,7 @@
   import Vue from 'vue'
   export default {
     data: function() {
-      return {view: Brisa.current_view, Brisa: Brisa};
+      return {view: Brisa.current_view, Brisa: Brisa, show_notify: false};
     },
     methods: {
       LoadDemo: function(path) {

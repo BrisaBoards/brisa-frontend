@@ -1,5 +1,5 @@
 // Brisa javascript client library, Version Brisa0.
-// Auto-generated on 2019-01-16
+// Auto-generated on 2019-02-20
 
 var BrisaAPI = {
   _include: {}
@@ -83,6 +83,16 @@ BrisaAPI.Entry.update = function(id, data) {
   return BrisaAPI.SendRequest('Entry:update', args, BrisaAPI.Entry, false);
 };
 
+BrisaAPI.Entry.assign = function(id, uid, assign, ctx, is_role) {
+  var args = { id: id, uid: uid, assign: assign, ctx: ctx, is_role: is_role };
+  return BrisaAPI.SendRequest('Entry:assign', args, null, false);
+};
+
+BrisaAPI.Entry.watch = function(id, watch) {
+  var args = { id: id, watch: watch };
+  return BrisaAPI.SendRequest('Entry:watch', args, null, false);
+};
+
 BrisaAPI.Entry.add_tags = function(id, tags) {
   var args = { id: id, tags: tags };
   return BrisaAPI.SendRequest('Entry:add_tags', args, BrisaAPI.Entry, false);
@@ -114,6 +124,11 @@ BrisaAPI.User.status = function(renew) {
 BrisaAPI.User.update_account = function(alias) {
   var args = { alias: alias };
   return BrisaAPI.SendRequest('User:update_account', args, null, false);
+};
+
+BrisaAPI.User.find = function(uid) {
+  var args = { uid: uid };
+  return BrisaAPI.SendRequest('User:find', args, BrisaAPI.User, false);
 };
 
 BrisaAPI.User.change_pass = function(password, new_password) {
@@ -185,6 +200,11 @@ BrisaAPI.Group.create = function(name) {
   return BrisaAPI.SendRequest('Group:create', args, BrisaAPI.Group, false);
 };
 
+BrisaAPI.Group.find = function(id) {
+  var args = { id: id };
+  return BrisaAPI.SendRequest('Group:find', args, BrisaAPI.Group, false);
+};
+
 BrisaAPI.Group.add_share = function(id, email, access) {
   var args = { id: id, email: email, access: access };
   return BrisaAPI.SendRequest('Group:add_share', args, BrisaAPI.Group, false);
@@ -238,7 +258,7 @@ BrisaAPI.Comment.all = function(entry_id) {
 
 BrisaAPI.Comment.find = function(id) {
   var args = { id: id };
-  return BrisaAPI.SendRequest('Comment:find', args, BrisaAPI.Comment, true);
+  return BrisaAPI.SendRequest('Comment:find', args, BrisaAPI.Comment, false);
 };
 
 BrisaAPI.Comment.create = function(data) {
@@ -257,8 +277,31 @@ BrisaAPI.Comment.update = function(id, data) {
 };
 
 
+BrisaAPI.Notification = function(state) { this.data = state;};
 
-BrisaAPI.Entry.prototype.id = function() { return this.data,id }
+BrisaAPI.Notification.all = function() {
+  var args = {  };
+  return BrisaAPI.SendRequest('Notification:all', args, BrisaAPI.Notification, true);
+};
+
+BrisaAPI.Notification.find = function(id) {
+  var args = { id: id };
+  return BrisaAPI.SendRequest('Notification:find', args, BrisaAPI.Notification, false);
+};
+
+BrisaAPI.Notification.mark_read = function(id) {
+  var args = { id: id };
+  return BrisaAPI.SendRequest('Notification:mark_read', args, null, false);
+};
+
+BrisaAPI.Notification.destroy = function(id) {
+  var args = { id: id };
+  return BrisaAPI.SendRequest('Notification:destroy', args, BrisaAPI.Notification, false);
+};
+
+
+
+BrisaAPI.Entry.prototype.id = function() { return this.data.id }
 
 BrisaAPI.Entry.prototype.title = function(new_val) {
   if (new_val !== undefined) this.data['title'] = new_val;
@@ -325,6 +368,16 @@ BrisaAPI.Entry.prototype.update = function() {
   return BrisaAPI.SendRequest('Entry:update', args, null, false, this);
 };
 
+BrisaAPI.Entry.prototype.assign = function(uid, assign, ctx, is_role) {
+  var args = { id: this.data.id, uid: uid, assign: assign, ctx: ctx, is_role: is_role }
+  return BrisaAPI.SendRequest('Entry:assign', args, null, false);
+};
+
+BrisaAPI.Entry.prototype.watch = function(watch) {
+  var args = { id: this.data.id, watch: watch }
+  return BrisaAPI.SendRequest('Entry:watch', args, null, false);
+};
+
 BrisaAPI.Entry.prototype.add_tags = function(tags) {
   var args = { id: this.data.id, tags: tags }
   return BrisaAPI.SendRequest('Entry:add_tags', args, null, false, this);
@@ -346,7 +399,7 @@ BrisaAPI.Entry.prototype.destroy = function() {
 };
 
 
-BrisaAPI.User.prototype.id = function() { return this.data,id }
+BrisaAPI.User.prototype.id = function() { return this.data.id }
 
 BrisaAPI.User.prototype.alias = function(new_val) {
   if (new_val !== undefined) this.data['alias'] = new_val;
@@ -359,7 +412,7 @@ BrisaAPI.User.prototype.admin = function(new_val) {
 };
 
 
-BrisaAPI.Model.prototype.id = function() { return this.data,id }
+BrisaAPI.Model.prototype.id = function() { return this.data.id }
 
 BrisaAPI.Model.prototype.owner_uid = function(new_val) {
   if (new_val !== undefined) this.data['owner_uid'] = new_val;
@@ -392,7 +445,7 @@ BrisaAPI.Model.prototype.update = function() {
 };
 
 
-BrisaAPI.UserSetting.prototype.id = function() { return this.data,id }
+BrisaAPI.UserSetting.prototype.id = function() { return this.data.id }
 
 BrisaAPI.UserSetting.prototype.user_id = function(new_val) {
   if (new_val !== undefined) this.data['user_id'] = new_val;
@@ -420,7 +473,7 @@ BrisaAPI.UserSetting.prototype.destroy = function() {
 };
 
 
-BrisaAPI.Group.prototype.id = function() { return this.data,id }
+BrisaAPI.Group.prototype.id = function() { return this.data.id }
 
 BrisaAPI.Group.prototype.name = function(new_val) {
   if (new_val !== undefined) this.data['name'] = new_val;
@@ -447,6 +500,11 @@ BrisaAPI.Group.prototype.access = function(new_val) {
   return this.data['access'];
 };
 
+BrisaAPI.Group.prototype.find = function() {
+  var args = { id: this.data.id }
+  return BrisaAPI.SendRequest('Group:find', args, null, false, this);
+};
+
 BrisaAPI.Group.prototype.add_share = function(email, access) {
   var args = { id: this.data.id, email: email, access: access }
   return BrisaAPI.SendRequest('Group:add_share', args, null, false, this);
@@ -468,7 +526,7 @@ BrisaAPI.Group.prototype.setting = function(name, value) {
 };
 
 
-BrisaAPI.Role.prototype.id = function() { return this.data,id }
+BrisaAPI.Role.prototype.id = function() { return this.data.id }
 
 BrisaAPI.Role.prototype.name = function(new_val) {
   if (new_val !== undefined) this.data['name'] = new_val;
@@ -486,7 +544,7 @@ BrisaAPI.Role.prototype.token = function(password, exp) {
 };
 
 
-BrisaAPI.Comment.prototype.id = function() { return this.data,id }
+BrisaAPI.Comment.prototype.id = function() { return this.data.id }
 
 BrisaAPI.Comment.prototype.user_uid = function(new_val) {
   if (new_val !== undefined) this.data['user_uid'] = new_val;
@@ -516,6 +574,49 @@ BrisaAPI.Comment.prototype.destroy = function() {
 BrisaAPI.Comment.prototype.update = function() {
   var args = { id: this.data.id, data: this.data }
   return BrisaAPI.SendRequest('Comment:update', args, null, false, this);
+};
+
+
+BrisaAPI.Notification.prototype.id = function() { return this.data.id }
+
+BrisaAPI.Notification.prototype.user_id = function(new_val) {
+  if (new_val !== undefined) this.data['user_id'] = new_val;
+  return this.data['user_id'];
+};
+
+BrisaAPI.Notification.prototype.parent = function(new_val) {
+  if (new_val !== undefined) this.data['parent'] = new_val;
+  return this.data['parent'];
+};
+
+BrisaAPI.Notification.prototype.ctx = function(new_val) {
+  if (new_val !== undefined) this.data['ctx'] = new_val;
+  return this.data['ctx'];
+};
+
+BrisaAPI.Notification.prototype.messages = function(new_val) {
+  if (new_val !== undefined) this.data['messages'] = new_val;
+  return this.data['messages'];
+};
+
+BrisaAPI.Notification.prototype.read = function(new_val) {
+  if (new_val !== undefined) this.data['read'] = new_val;
+  return this.data['read'];
+};
+
+BrisaAPI.Notification.prototype.find = function() {
+  var args = { id: this.data.id }
+  return BrisaAPI.SendRequest('Notification:find', args, null, false, this);
+};
+
+BrisaAPI.Notification.prototype.mark_read = function() {
+  var args = { id: this.data.id }
+  return BrisaAPI.SendRequest('Notification:mark_read', args, null, false);
+};
+
+BrisaAPI.Notification.prototype.destroy = function() {
+  var args = { id: this.data.id }
+  return BrisaAPI.SendRequest('Notification:destroy', args, BrisaAPI.Notification, false);
 };
 
 

@@ -17,13 +17,8 @@
     data: function() {
       return {width: 400 };
     },
-    computed: {
-      width_s: function() {
-        return 'width: ' + this.width + 'px;';
-      }
-    },
-    watch: {
-      show: function(show_val) {
+    methods: {
+      setWidth: function(show_val) {
         this.$nextTick(function() {
           if (show_val) {
             var cont = Brisa.content;
@@ -32,6 +27,19 @@
             $(this.$refs.popup).offset({left: offset });
           }
         }.bind(this));
+      }
+    },
+    computed: {
+      width_s: function() {
+        return 'width: ' + this.width + 'px;';
+      }
+    },
+    mounted: function() {
+      this.setWidth(true);
+    },
+    watch: {
+      show: function(show_val) {
+        this.setWidth(show_val);
       },
     },
   });

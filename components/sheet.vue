@@ -46,9 +46,9 @@
                   :key="idx"
                   v-if="select_idx == entry"
                   :show="true"
-                  wrap_style="cursor: default; width: 98vw; padding-left: 10px; padding-right: 10px;"
+                  wrap_style="cursor: default; xwidth: 98vw; padding-left: 10px; padding-right: 10px;"
                   >
-                <brisa-entry-pop @delete="OnDelete(entry_dict[entry], idx)" v-if="select_idx == entry" slot="popup" :entry="entry_dict[entry]" @on-close="onToggle(entry)"></brisa-entry-pop>
+                <brisa-entry-pop :api_ctx="view.parent.id() + '-_sheet'" @delete="OnDelete(entry_dict[entry], idx)" v-if="select_idx == entry" slot="popup" :entry="entry_dict[entry]" @on-close="onToggle(entry)"></brisa-entry-pop>
         
                 <slot name="title">
                 </slot>
@@ -62,7 +62,7 @@
                   {{entry_dict[entry].title()}}
                 </div>
                 <div class="">
-                  <button v-for="uit in Brisa.ui_types" @touchstart.stop @mousedown.stop @click.stop="Brisa.OpenView(entry_dict[entry], uit)" v-if="entry_dict[entry].metadata()[uit.cls]" style="max-width: 40px; overflow: hidden" class="btn btn-round-xs btn-outline-primary mr-1 xtext-primary"><i :class="'fa ' + uit.icon"></i> {{uit.name}}</button>
+                  <button v-for="uit in Brisa.ui_types" @touchstart.stop @mousedown.stop @click.stop="Brisa.OpenCtx(entry_dict[entry], uit.cls)" v-if="entry_dict[entry].metadata()[uit.cls]" style="max-width: 40px; overflow: hidden" class="btn btn-round-xs btn-outline-primary mr-1 xtext-primary"><i :class="'fa ' + uit.icon"></i> {{uit.name}}</button>
                 </div>
               </div>
             </div>

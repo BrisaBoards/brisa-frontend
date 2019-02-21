@@ -11,6 +11,17 @@ export default function() {
   // Real-time handlers
   Brisa.ActionCable = require('actioncable');
   Brisa.EventBus = new Vue();
+  Brisa.notify = {
+    update: function() {
+      var new_cnt = 0;
+      for (var msg of Brisa.notify.messages) {
+        if (!msg.data.is_read) new_cnt++;
+      }
+      Brisa.notify.unread_count = new_cnt;
+    },
+    unread_count: 0,
+    messages: [],
+  };
   Brisa.cable = null;
   Brisa.cache = new BrisaCache();
   Brisa.cache.Register('Entry', {
@@ -20,6 +31,10 @@ export default function() {
   Brisa.cache.Register('Comments', {
     key: function(entry_id) { return entry_id },
     lookup: function(entry_id) { return BrisaAPI.Comment.all(entry_id) },
+  });
+  Brisa.cache.Register('User', {
+    key: function(uid) { return uid },
+    lookup: function(uid) { return BrisaAPI.User.find(uid) },
   });
   Brisa.cache.Register('Comment', {
     key: function(comment_id) { return comment_id },
@@ -83,6 +98,28 @@ export default function() {
       Brisa.messager.onMessage(data);
     } else if (data.m == 'cmt') {
       Brisa.messager.onMessage(data);
+    } else if (data.m == 'notify') {
+      if (data.a == 'new') {
+        BrisaAPI.Notification.find(data.id).then(function(r) {
+          Brisa.notify.messages.unshift(r);
+          Brisa.notify.update();
+        });
+      } else if (data.a == 'up') {
+        for (var midx in Brisa.notify.messages) {
+          var msg = Brisa.notify.messages[midx];
+          if (msg.data.id == data.id) {
+            Brisa.notify.messages.unshift(Brisa.notify.messages.splice(midx, 1)[0]);
+            msg.find();
+          }
+        }
+        Brisa.notify.update();
+      } else if (data.a == 'destroy') {
+        for (var i in Brisa.notify.messages) {
+          var msg = Brisa.notify.messages[i];
+          if (msg.data.id == data.id) { Brisa.notify.messages.splice(i,1); break; }
+        }
+        Brisa.notify.update();
+      }
     }
   };
   Brisa.socketURL = function() {
@@ -113,6 +150,10 @@ export default function() {
     }
     Brisa.startSocket();
     Brisa.LoadModels(null);
+    BrisaAPI.Notification.all().then(function(r) {
+      Brisa.notify.messages = r;
+      Brisa.notify.update();
+    });
     BrisaAPI.User.groups().then(function(r) {
       Vue.set(Brisa, 'groups', [{data:{id: null, name: 'Personal'}}].concat(r));
       for (let group of Brisa.groups) {
@@ -177,6 +218,10 @@ export default function() {
     }).catch(function(r) { Brisa.current_view = view; });
     return view;
   };
+  Brisa.OpenCard = function(entry) {
+    var view = this.AddView(entry.title(), 'brisa-entry-view', {tags: [], classes: []}, entry, []);
+    view.ctx_str = entry.data.id;
+  };
   Brisa.OpenView = function(parent, uitype) {
     var md = parent.data.metadata;
     var group_id = parent.data.group_id;
@@ -185,7 +230,25 @@ export default function() {
       var view = this.AddView(parent.title(), uitype.cmp,
           {tags: cls_md.tags || [], classes: cls_md.classes || []},
           parent, r);
+      view.ctx_str = parent.data.id + ':' + uitype.cls;
     }.bind(this));    
+  };
+  Brisa.OpenCtx = function(entry, board) {
+    var uitype = null;
+    var ctx = board ? entry.data.id + ':' + board : entry.data.id;
+    for (var uit of Brisa.ui_types) { if (uit.cls == board) uitype = uit; }
+      for (var view of (Brisa.group_views[entry.group_id()] || [])) {
+        console.log("Checking ctx", ctx, view.ctx_str);
+        if (view.ctx_str == ctx) {
+          Brisa.current_view = view;
+          return;
+        }
+      }
+      if (uitype) {
+        Brisa.OpenView(entry, uitype);
+      } else {
+        Brisa.OpenCard(entry);
+      }
   };
 
   Brisa.ui_classes = {
@@ -268,7 +331,8 @@ export default function() {
   Brisa.Theme = function() { return this.GetSetting('theme', {image: 'backgrounds/breeze2.jpg'}); };
   Brisa.background_opts = {
     classes: "primary,secondary,dark,light,info,success,danger,warning".split(","),
-    colors: "red,green,blue".split(","),
+    colors: "White:white,Light Grey:#f0f0f0,Black:black,Red:#fcc,Green:#cfc,Blue:#ccf".split(",").
+        map((v) => v.split(':')),
     images: [
       {url: 'backgrounds/breeze2.jpg', title: 'Brisa Watercolor'},
       {url: 'backgrounds/breeze.jpg', title: 'Brisa'},

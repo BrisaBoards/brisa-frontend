@@ -19,7 +19,7 @@
             :data-kbgroup="group.unique_id" :options="{dataIdAttr: group.unique_id, group: 'kbgroup', handle: '.kblist-target'}">
           <div :key="ent + '_' + idx" class="kblist-target m-0 mt-1" :data-ent="ent" style="position: relative;"
               v-if="entry_dict[ent]" v-for="(ent, idx) in sorted_groups[group.unique_id]">
-            <brisa-entry-card class="kanban-card" @delete="OnDelete(entry_dict[ent], idx, group.unique_id)" wrapper="card-body-sm" :select="onSelect" margin="1px" :selected.sync="selected_entry" :hide_desc="true" :entry="entry_dict[ent]">
+            <brisa-entry-card :api_ctx="entry.id() + '-_kanban'" class="kanban-card" @delete="OnDelete(entry_dict[ent], idx, group.unique_id)" wrapper="card-body-sm" :select="onSelect" margin="1px" :selected.sync="selected_entry" :hide_desc="true" :entry="entry_dict[ent]">
               <span slot="title">{{entry_dict[ent] ? entry_dict[ent].title() : 'No title for ' + ent}}</span>
             </brisa-entry-card>
           </div>
