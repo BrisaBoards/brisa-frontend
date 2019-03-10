@@ -28,8 +28,8 @@
         </tr>
       </thead>
 
-      <draggable element="tbody" @end="UpdateOrder" v-model="entries"
-        :options="{handle: '.sheet-handle'}">
+      <draggable tag="tbody" @end="UpdateOrder" v-model="entries"
+        handle=".sheet-handle">
         <tr :key="entry + '_' + idx"
           v-if="entry_dict[entry] != undefined && entry_dict[entry].data.id != pid" v-for="(entry, idx) in entries"
           style="padding: 0px; margin: 0px;">

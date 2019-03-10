@@ -238,7 +238,6 @@ export default function() {
     var ctx = board ? entry.data.id + ':' + board : entry.data.id;
     for (var uit of Brisa.ui_types) { if (uit.cls == board) uitype = uit; }
       for (var view of (Brisa.group_views[entry.group_id()] || [])) {
-        console.log("Checking ctx", ctx, view.ctx_str);
         if (view.ctx_str == ctx) {
           Brisa.current_view = view;
           return;

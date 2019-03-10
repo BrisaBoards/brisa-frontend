@@ -15,8 +15,8 @@
           </slot>
         </div>
         <div class="pl-2 pb-2" style="white-space: nowrap">
-      <div class="p-1 text-primary " style="opacity: 0.75; display: inline-block" v-if="entry.data.assignees.indexOf(Brisa.user.uid) != -1">
-        <i class="fa fa-user-clock"></i>
+      <div class="p-1 text-info " style="opacity: 0.75; display: inline-block" v-if="entry.data.assignees.indexOf(Brisa.user.uid) != -1">
+        <i class="fa fa-circle"></i>
       </div>
 
           <div class="p-1 noselect text-primary xfloat-right" style="display: inline-block; opacity: 0.6" v-if="entry.comment_count() > 0">

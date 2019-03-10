@@ -112,6 +112,10 @@ BrisaIDB.prototype.dispatch = function(action, args) {
   return promise;
 };
 
+BrisaIDB.action('Notification:all', '', 'custom', function(act, args, resolve, reject) {
+  resolve({data: []});
+});
+
 BrisaIDB.action('User:status', '', 'custom', function(act, args, resolve, reject) {
   resolve({data: {logged_in: true, user_id: 1, alias: 'Preview', email: 'Preview'}});
 });
@@ -210,6 +214,8 @@ BrisaIDB.action('Comment:all', 'comments', 'iter', function(obj, args) {
 });
 BrisaIDB.action('Entry:create', 'entries', 'create', function(obj) {
   if (obj.data.metadata == undefined) obj.data.metadata = {};
+  if (obj.data.assignees == undefined) obj.data.assignees = [];
+  if (obj.data.watchers == undefined) obj.data.watchers = [];
   if (!obj.data.group_id) obj.data.group_id = null;
   obj.data.owner_id = 1;
   obj.data.creator_id = 1;

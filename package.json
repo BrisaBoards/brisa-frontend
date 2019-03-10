@@ -7,7 +7,7 @@
   "homepage": "",
   "dependencies": {
     "actioncable": "^5.2.2",
-    "vuedraggable": "^2.16.0"
+    "vuedraggable": "^2.19.1"
   },
   "devDependencies": {
     "poi": "^10.2.10",

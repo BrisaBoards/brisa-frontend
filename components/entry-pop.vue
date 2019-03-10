@@ -167,6 +167,7 @@
       <button @click="show_expand = !show_expand" class="btn btn-xs btn-link"><i class="fa fa-plus"></i> &nbsp;Expand Card</button>
       </div>
       <div style="display: inline-block;" class="float-right">
+        <button @click="Brisa.OpenCtx(entry)" class="btn btn-link btn-xs"><i class="fa fa-external-link-alt"></i></button>
         <textarea :value="JSON.stringify(entry.data, null, 2)" rows="10" v-if="show_code" style="border: 2px solid #ccc; border-radius: 2px; font-size: 100%; font-family: monospace; width: 400px; max-width: 90%; position: absolute; transform: translateY(-100%) translateX(-90%);">
           
         </textarea>
@@ -313,7 +314,7 @@
         let uid = u.uid;
         Brisa.cache.get('User', uid, false).then(function(r) { this.ucache[uid] = r.data.alias; }.bind(this));
       }
-      Brisa.cache.get('User', this.entry.data.creator_uid).then(function(r) {
+      Brisa.cache.get('User', this.entry.data.creator_uid, false).then(function(r) {
         this.entry_info.creator = r.data.alias;
       }.bind(this));
     },

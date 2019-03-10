@@ -1,5 +1,6 @@
 <template>
-  <brisa-card bg_class="bg-light" :color="color" :opacity="opacity" :style="'margin-top: ' + (margin || '10px')">
+  <brisa-card bg_class="bg-light" :color="color" :opacity="opacity"
+    :style="'margin-top: ' + (margin || '10px')">
     <div @click="onClick" style="cursor: pointer;" @mouseover="hovering = true" @mouseout="hovering = false"
         :class="wrapper || 'card-body pl-3 pt-3 pr-3 pb-1'">
 
@@ -24,8 +25,8 @@
         <p class="" v-html="fmtText(entry.description())"></p>
       </div>
     <div>
-      <div class="p-1 text-primary " style="opacity: 0.75; display: inline-block" v-if="entry.data.assignees.indexOf(Brisa.user.uid) != -1">
-        <i class="fa fa-user-clock"></i>
+      <div class="p-1 text-info " style="opacity: 0.75; display: inline-block" v-if="entry.data.assignees.indexOf(Brisa.user.uid) != -1">
+        <i class="fa fa-circle"></i>
       </div>
       <button v-for="uit in Brisa.ui_types" @mousedown.stop @touchstart.stop @click.stop="Brisa.OpenCtx(entry, uit.cls)"
           v-if="entry.metadata()[uit.cls]" class="btn btn-round-xs btn-outline-primary mt-2 ml-1 mb-2"><i :class="'fa ' + uit.icon"></i> {{uit.name}}</button>

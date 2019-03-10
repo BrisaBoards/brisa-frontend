@@ -1,6 +1,7 @@
 <template>
   <div :style="'height: 100%; ' + (noOverflow ? 'white-space: nowrap; overflow: hidden; text-overflow: ellipsis;' : '')">
     <div style="width: 100%;" class="" @click.stop="StartEdit()" v-if="!do_edit">
+      <slot>
       <component :is="wrapper || 'span'">
         <span v-if="value == '' || value == null" class="text-muted">
           Add {{name}}
@@ -15,6 +16,7 @@
           {{value}}
         </span>
       </component>
+      </slot>
     </div>
     <component style="height: 100%; min-height: 50px;" :is="wrapper || 'div'" v-if="do_edit" class="xd-flex">
       <div class="flex-grow-1" style="height: 100%; position: relative;">

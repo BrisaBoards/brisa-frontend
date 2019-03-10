@@ -31,7 +31,7 @@
     <div :key="'group_' + group_idx" class="bg-transparent pt-4 w-100" style="xoverflow-x: hidden;" :class="expanded ? 'p-1 pl-1 pr-1' : 'p-0'"
         v-for="(group, group_idx) in Brisa.groups">
       <div v-if="expanded" @click="GroupSettings(group)" style="cursor: pointer;" class="xtext-light float-right p-1">
-        <i class="fa fa-cog"></i>
+        <i class="fa fa-cog" style="opacity: 0.5"></i>
       </div>
       <div key="grp-cont" class="mb-1 pl-1 pr-1" style="text-align: left; white-space: nowrap; xoverflow: hidden;">
       <h4 v-if="!Brisa.group_views[group.data.id]" :style="expanded ? '' : 'font-size: 100%;'" @click="OpenDash(group.data.id)" style="cursor: pointer;" class="text-info text-of mb-0 noselect">{{group.data.name}}</h4>
@@ -43,12 +43,12 @@
         <div @click.stop v-if="!expanded && hover_view == view.unique_id"
             style="white-space: nowrap; text-align: left; cursor: default; z-index: 10000; top: 3px; left: 89%; position: absolute; max-width: 200px; overflow: hidden;"
             class="border p-1 rounded border-secondary bg-light text-dark">
-          <button @click="CloseView(group.data.id, idx)" class="btn m-0 btn-sm btn-outline-danger p-2"><i class="fa fa-times"></i></button>
+          <button @click="CloseView(group.data.id, idx)" class="btn m-0 btn-sm btn-outline-danger p-2"><i class="fa fa-times" style="opacity: 0.5"></i></button>
           <button v-if="false" @click="" class="btn m-0 btn-sm p-2 pt-0 pb-0 btn-outline-success"><i class="fa fa-thumbtack"></i></button>
         </div>
         </transition>
         <div class="" :style="expanded ? '' : 'xfont-size: 75%;'" style="xwhite-space: nowrap; xtext-align: left; display: inline-block; width: 100%; overflow: hidden;">
-          <div class="float-right" v-if="expanded"><button @click.stop="CloseView(group.data.id, idx)" style="font-size: 75%; border: 0px; box-shadow: 0 0 0" class="btn btn-xs p-1 m-0 btn-outline-danger"><i class="fa fa-times"></i></button></div>
+          <div class="float-right" v-if="expanded"><button @click.stop="CloseView(group.data.id, idx)" style="font-size: 75%; border: 0px; box-shadow: 0 0 0" class="btn btn-xs p-1 m-0 btn-outline-danger"><i class="fa fa-times" style="opacity: 0.5"></i></button></div>
           <span><i v-if="view.component == 'brisa-dashboard'" class="fa fa-th"></i>
           <i :class="'fa ' + Brisa.ui_classes[view.component].icon" v-if="Brisa.ui_classes[view.component]"></i>
           </span>

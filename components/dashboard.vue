@@ -118,6 +118,7 @@
         Brisa.CreateEntry(entry).then(function(r) {
           //if (this.CheckEntry(this.view.entries, r.data.id) != -1) return;
           //this.view.entries.unshift(r);
+          if (!BrisaAPI._api_path) this.view.entries.unshift(r);
         }.bind(this));
       },
       InitTags: function() {

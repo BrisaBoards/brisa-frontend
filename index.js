@@ -1,6 +1,7 @@
 import Vue from 'vue';
 import BrisaMain from './brisa-main.js';
 import BrisaCard from './components/card.vue';
+import BrisaDraggableContainer from './components/draggable-container.vue';
 import BrisaEntryCard from './components/entry-card.vue';
 import BrisaEntryCardHoriz from './components/entry-card-horiz.vue';
 import BrisaEntryView from './components/entry-view.vue';
@@ -27,6 +28,7 @@ Vue.component('brisa-entry-card', BrisaEntryCard);
 Vue.component('brisa-entry-card-horiz', BrisaEntryCardHoriz);
 Vue.component('brisa-entry-view', BrisaEntryView);
 Vue.component('brisa-badge-list', BrisaBadgeList);
+Vue.component('brisa-drag-cont', BrisaDraggableContainer);
 Vue.component('brisa-entry-pop', BrisaEntryPop);
 Vue.component('brisa-inline-editor', BrisaInlineEditor);
 Vue.component('brisa-models', BrisaModels);

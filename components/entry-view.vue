@@ -1,7 +1,8 @@
 <template>
-  <brisa-entry-pop :hide_icons="true" :entry="view.parent">
+  <div style="overflow-y: auto;">
+  <brisa-entry-pop :hide_icons="true" :entry="view.parent" style="width: 100%; xoverflow-y: auto;">
   </brisa-entry-pop>
-
+  </div>
 </template>
 <script>
   import Vue from 'vue'

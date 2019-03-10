@@ -24,6 +24,9 @@
           <small>Hello, {{Brisa.user.alias}}!</small>
         </div>
         <div style="max-height: 75vh; overflow-y: auto;">
+        <div class="w-100 card-header pt-4 pb-4" key="no-notify" v-if="Brisa.notify.messages.length == 0">
+          No notifications.
+        </div>
         <brisa-notification @selected="show_notify = false;" :key="note.data.id" :note="note" v-for="note,idx in Brisa.notify.messages"></brisa-notification>
         </div>
       </div>
@@ -71,6 +74,8 @@
           }
           for (var i=r.entries.length - 1; i>= 0; i--) {
             var ent = r.entries[i]
+            ent.assignees = [];
+            ent.watchers = [];
             BrisaAPI._brisa_idb.raw_create('entries', ent);
             if (ent.group_id == null && ent.tags.indexOf('Important') != -1) {
               Brisa.current_view.entries.push(new BrisaAPI.Entry(ent));
