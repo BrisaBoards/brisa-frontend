@@ -29,8 +29,8 @@
             Remove
           </button>
         </div>
-        <draggable :key="'drag' + group.unique_id" xref="draggable" style="padding-bottom: 30px;"
-            @add="UpdateEntry"
+        <draggable :key="'drag' + group.unique_id" ref="draggable" style="padding-bottom: 30px;"
+            handle=".kblist-target" @add="UpdateEntry"
             @end="UpdateGroups" v-model="sorted_groups[group.unique_id]"
             tag="brisa-drag-cont" :component-data="{on: {}, props: {'cont_id': group.unique_id}}"
             group="kb-cards">
