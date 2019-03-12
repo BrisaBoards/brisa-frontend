@@ -46,7 +46,7 @@
                   :key="idx"
                   v-if="select_idx == entry"
                   :show="true"
-                  wrap_style="cursor: default; xwidth: 98vw; padding-left: 10px; padding-right: 10px;"
+                  wrap_style="white-space: normal; cursor: default; xwidth: 98vw; padding-left: 10px; padding-right: 10px;"
                   >
                 <brisa-entry-pop :api_ctx="view.parent.id() + '-_sheet'" @delete="OnDelete(entry_dict[entry], idx)" v-if="select_idx == entry" slot="popup" :entry="entry_dict[entry]" @on-close="onToggle(entry)"></brisa-entry-pop>
         
