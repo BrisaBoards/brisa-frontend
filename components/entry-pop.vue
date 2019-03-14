@@ -10,7 +10,7 @@
       </button>
     </div>
 
-    <div class="card-body" @click.stop="noop">
+    <div class="card-body" @click.stop>
 
       <div class="d-flex clearfix">
         <div class="flex-grow-1" style="flex-grow: 1;">
@@ -31,6 +31,7 @@
         <div class="col-12 col-lg-4 xtext-muted">
           <div>
             <small><span v-if="entry_info.creator">By {{entry_info.creator}}</span> <span v-if="entry_info.stamp">on {{entry_info.stamp}}</span></small>
+            <button @click="ToggleWatch" class="btn btn-xs btn-link">{{entry.data.watchers.indexOf(Brisa.user.uid) != -1 ? "Stop Watching" : "Watch this card" }}</button>
           </div>
           <div>
             <button @click="expand_assign = !expand_assign" class="btn btn-xs btn-link">
@@ -45,18 +46,37 @@
             </div>
             </div>
             <div>
-            <button @click="ToggleWatch" class="btn btn-xs btn-link">{{entry.data.watchers.indexOf(Brisa.user.uid) != -1 ? "Stop Watching" : "Watch this card" }}</button>
             </div>
           </div>
         </div>
-        <div class="col-12 col-lg-4 " style="display: inline-block; xbackground-color: rgba(200,225,255,0.7); border-radius: 20px;">
-          <span v-for="tag in entry.tags()" class="border-primary bg-light text-primary" style="font-size: 90%; border-radius: 8px; padding: 3px; margin: 1px;">
-            {{tag}} <a @click="RemoveTag(tag)" style="border-radius: 5px;"> &nbsp;<span class="fas fa-times-circle xtext-danger"></span></a>
+
+        <!-- Tags -->
+        <div v-if="tags" class="col-12 col-lg-4 " style="display: inline-block; border-radius: 20px;">
+          <div class="p-2 rounded bg-light" @click="tag_popup = !tag_popup" style="cursor: pointer; display: inline-block">
+            <small>Labels</small><br/>
+          <span v-if="tag.selected" v-for="tag in tags.labels" class="m-1 border-primary bg-light text-primary"
+              style="padding: 2px; border-radius: 8px;">
+            <small>{{tag.tag}}</small>
           </span>
-          <span>
-            <input @keypress.enter="AddTag()" ref="new_tag" class="form-control form-control-sm" placeholder="Add tag" style="display: inline-block; width: 125px;">
-          </span>
+          </div>
+
+          <div v-if="tag_popup" class="bg-light rounded border p-2" style="min-width: 200px; border: 1px solid #888; position: absolute;">
+            <div style="font-size: 80%; font-weight: bold" class="text-muted mb-1">Labels</div>
+            <div @click="tag.selected ? RemoveTag(tag.tag) : AddTag(tag.tag)" v-for="tag in tags.labels" :class="tag.selected ? 'bg-primary text-light' : 'bg-light text-primary'"
+                class="m-1 pl-2" style="padding: 3px; cursor: pointer; border-radius: 8px;">
+              <small>{{tag.tag}}</small>
+            </div>
+
+            <div style="font-size: 80%; font-weight: bold;" class="text-muted mt-2 mb-1">Other Tags</div>
+            <div v-for="tag in tags.tags" class="border-primary bg-primary text-light m-1 pl-1 pr-1" style="border-radius: 8px;">
+              <small>{{tag}}<a @click="RemoveTag(tag)" style="border-radius: 5px;"> &nbsp;<span class="fas fa-times-circle xtext-danger"></span></a></small>
+            </div>
+            <div>
+              <input @keypress.enter="AddTag()" ref="new_tag" class="form-control form-control-sm" placeholder="Add tag" style="display: inline-block; width: 125px;">
+            </div>
+          </div>
         </div>
+
       </div>
 
       <div class="p-1" style="background-color: rgba(0,0,0,0.02);">
@@ -72,11 +92,12 @@
       <div v-for="(cls,idx) in classes()" v-if="cls">
         <div class="mt-4">
           <h4>{{cls.title()}}</h4>
-        <div class="row m-2" v-for="field in cls.config().fields">
-          <div class="col-12 col-md-3 col-lg-2 p-2">{{field.title}}</div>
-          <div class="col-12 col-md-9 col-lg-10 p-2 rounded" style="background-color: #f4f4f4; xheight: 100%;"><brisa-inline-editor :name="field.title" :updated="UpdatedAttr" :update_ref="{cls: cls.unique_id(), field: field.id}"
+
+          <div class="col-12 col-md-9 col-lg-10 p-2 rounded" style="background-color: #f4f4f4; xheight: 100%;">
+            <brisa-inline-editor :name="field.title" :updated="UpdatedAttr" :update_ref="{cls: cls.unique_id(), field: field.id}"
               :val_type="field.field_type" :value="(entry.data.metadata[cls.unique_id()] || {})[field.id]" wrapper="div">
-          </brisa-inline-editor></div>
+            </brisa-inline-editor>
+          </div>
         </div>
       </div>
         </div>
@@ -195,6 +216,7 @@
         show_code: false,
         comments: null,
         add_comment: false,
+        tags: null, tag_popup: false,
       };
     },
     methods: {
@@ -249,12 +271,18 @@
           this.entry.update();
         }
       },
-      AddTag: function() {
-        this.entry.add_tags(this.$refs.new_tag.value);
-        this.$refs.new_tag.value = '';
+      AddTag: function(new_tag) {
+        var p;
+        if (new_tag) {
+          p = this.entry.add_tags(new_tag);
+        } else {
+          p = this.entry.add_tags(this.$refs.new_tag.value);
+          this.$refs.new_tag.value = '';
+        }
+        p.then(() => { this.UpdateTags() });
       },
       RemoveTag: function(tag) {
-        this.entry.remove_tags(tag);
+        this.entry.remove_tags(tag).then(() => { this.UpdateTags() });
       },
       AddModel: function(model) {
         this.entry.edit_class(model, {}).then(function(r) {
@@ -285,6 +313,9 @@
         return this.entry.classes() || [];
       },
       noop: function() { },
+      UpdateTags: function() {
+        Brisa.SortTags(this.entry).then((r) => { this.tags = r; });
+      },
     },
     mounted: function() {
       $(this.$refs.add_btn).dropdown();
@@ -302,6 +333,7 @@
     },
     created: function() {
       this.entry_info.stamp = (new Date(this.entry.data.created_at)).toLocaleDateString();
+      this.UpdateTags();
       if (this.entry.data.group_id) {
         for (var g of Brisa.groups) {
           if (g.data.id == this.entry.data.group_id) this.assign_list = g.data.access;

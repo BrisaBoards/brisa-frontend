@@ -305,11 +305,11 @@ export default function() {
   Brisa.GroupSetting = function(group_id, name, defaults) {
     var group = Brisa.Group(group_id);
     if (!group) return undefined;
-    if (!group.settings[name]) {
+    if (!group.data.settings[name]) {
       group.setting(name, defaults);
       return defaults;
     }
-    return group.settings[name];
+    return group.data.settings[name];
   };
   Brisa.GetSetting = function(name, defaults) {
     return new Promise(function(resolve, reject) {
@@ -325,7 +325,28 @@ export default function() {
   };
   Brisa.Labels = function(group_id) {
     if (!group_id) return this.GetSetting('labels', ['Important']);
-    
+    return new Promise(function(resolve, rej) {
+      resolve({data: {setting: Brisa.GroupSetting(group_id, 'labels', ['Important']) }});
+    });
+  };
+  Brisa.SortTags = function(entry) {
+    var result = {labels: [], tags: [], group: null};
+    return new Promise((res,rej) => {
+      Brisa.Labels(entry.data.group_id).then(function(group_tags) {
+        var labels = [];
+        result.group = group_tags;
+        for (var t of group_tags.data.setting) {
+          result.labels.push({label: t, tag: t, selected: false});
+          labels.push(t);
+        }
+        for (var t of entry.data.tags) {
+          var lbl_idx = labels.indexOf(t);
+          if (lbl_idx != -1) result.labels[lbl_idx].selected = true;
+          else result.tags.push(t);
+        }
+        res(result);
+      });
+    });
   };
   Brisa.Theme = function() { return this.GetSetting('theme', {image: 'backgrounds/breeze2.jpg'}); };
   Brisa.background_opts = {

@@ -3,16 +3,31 @@
     <div class="container-fluid">
     <div class="row" style="padding-top: 0px;">
       <div class="col-12">
-        <brisa-badge-list add_style="padding-top: 5px; margin-right: 5px; border-radius: 0px 0px 5px 5px;" highlight="info" @sel_change="SelectLabel"
-          :labels="user_labels.data.setting.concat(['All', 'Untagged'])" :selected.sync="sel_label">
+        <brisa-badge-list add_style="padding-top: 5px; margin-right: 5px; border-radius: 0px 0px 5px 5px;" highlight="info"
+          @sel_change="SelectLabel"
+          :labels="user_labels.data.setting.concat([{sel: 'more', fa: 'fa-ellipsis-h'}, 'All', 'Untagged'])" :selected.sync="sel_label">
         </brisa-badge-list>
         <span style="padding: 5px;"></span>
         <brisa-badge-list add_style="padding-top: 5px; margin-right: 5px; border-radius: 0px 0px 5px 5px;"
           highlight="primary" @sel_change="SelectModel" :selected="sel_model" :labels="(models || []).map(function(m) { return m.title() })">
         </brisa-badge-list>
       </div>
+      <div key="settings" class="col-12 p-3 bg-light text-dark" v-if="show_settings">
+        <h3>Labels</h3>
+        <draggable v-model="user_labels.data.setting" @change="SaveLabels">
+        <div class="mr-2 inline-block text-center p-1" style="border-left: 2px solid rgba(126,126,126,0.5); display: inline-block"
+            v-for="(label,idx) in user_labels.data.setting">
+          <brisa-inline-editor class="m-2" name="Label" :update_ref="idx" :value="label" :updated="EditLabel" val_type="string">
+          </brisa-inline-editor>
+          <button @click="DeleteLabel(idx)" class="btn btn-sm btn-outline-warning float-left"><i class="fa fa-times"></i></button>
+        </div>
+        </draggable>
+        <div class="m-2">
+          <brisa-inline-editor style="display:inline-block" name="Label" :updated="AddLabel" val_type="string">
+          </brisa-inline-editor>
+        </div>
+      </div> 
       <div class="col-12 col-lg-6">
- 
         <div class="col-12 pl-3 p-1 pb-2">
           <add-card :onSubmit="AddEntry" ></add-card>
         </div>
@@ -43,6 +58,7 @@
         group_id: this.view.group_id,
         showPopper: {},
         show_links: null,
+        show_settings: false,
         sel_entry: null,
         sel_label: null,
         sel_model: null,
@@ -52,6 +68,27 @@
       }
     },
     methods: {
+      SaveLabels: function() {
+        if (this.group_id)
+          Brisa.Group(this.group_id).setting('labels', this.user_labels.data.setting);
+        else
+          this.user_labels.update();
+      },
+      DeleteLabel: function(idx) {
+        this.user_labels.data.setting.splice(idx,1);
+        this.$forceUpdate();
+        this.SaveLabels();
+      },
+      EditLabel: function(val, idx) {
+        this.user_labels.data.setting[idx] = val;
+        this.$forceUpdate();
+        this.SaveLabels();
+        console.log(val, idx, this.user_labels.data.setting);
+      },
+      AddLabel: function(new_label) {
+        this.user_labels.data.setting.push(new_label);
+        this.SaveLabels();
+      },
       OnDelete: function(entry, idx) {
         entry.destroy().then(function(r) {
           var ent = this.view.entries.splice(idx, 1)[0];
@@ -72,6 +109,10 @@
         return Brisa.formatText(str);
       },
       SelectLabel: function(idx, label) {
+        if (label.sel == 'more') {
+          this.show_settings = !this.show_settings;
+          return;
+        }
         var tags = null;
         this.sel_label = idx;
         this.sel_model = -1;
@@ -144,6 +185,11 @@
       Brisa.messager.Register(this.view, this.RTUpdate, this.RTUpdate, this.RTUpdate);
     },
     created: function() {
+      Brisa.Labels(this.group_id).then(function(r) {
+        this.user_labels = r;
+        this.SelectLabel(0, this.user_labels.data.setting[0]);
+      }.bind(this));
+      return;
       if (this.group_id) {
         this.user_labels = {data: {setting: Brisa.GroupSetting(this.group_id, 'labels', ['Important'])}};
         this.SelectLabel(0, this.user_labels.data.setting[0]);
