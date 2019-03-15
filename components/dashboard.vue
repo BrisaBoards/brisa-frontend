@@ -69,10 +69,11 @@
     },
     methods: {
       SaveLabels: function() {
-        if (this.group_id)
-          Brisa.Group(this.group_id).setting('labels', this.user_labels.data.setting);
-        else
+        if (this.group_id) {
+          Brisa.SetGroupSetting(this.group_id, 'labels', this.user_labels.data.setting);
+        } else {
           this.user_labels.update();
+        }
       },
       DeleteLabel: function(idx) {
         this.user_labels.data.setting.splice(idx,1);
@@ -83,7 +84,6 @@
         this.user_labels.data.setting[idx] = val;
         this.$forceUpdate();
         this.SaveLabels();
-        console.log(val, idx, this.user_labels.data.setting);
       },
       AddLabel: function(new_label) {
         this.user_labels.data.setting.push(new_label);

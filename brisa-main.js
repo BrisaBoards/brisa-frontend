@@ -311,6 +311,12 @@ export default function() {
     }
     return group.data.settings[name];
   };
+  Brisa.SetGroupSetting = function(group_id, name, value) {
+    var group = Brisa.Group(group_id);
+    if (!group) return undefined;
+    group.setting(name, value);
+    Vue.set(group.data.settings, name, value);
+  };
   Brisa.GetSetting = function(name, defaults) {
     return new Promise(function(resolve, reject) {
       if (this.settings[name]) {
