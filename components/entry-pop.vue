@@ -93,13 +93,14 @@
         <div class="mt-4">
           <h4>{{cls.title()}}</h4>
 
-          <div class="col-12 col-md-9 col-lg-10 p-2 rounded" style="background-color: #f4f4f4; xheight: 100%;">
-            <brisa-inline-editor :name="field.title" :updated="UpdatedAttr" :update_ref="{cls: cls.unique_id(), field: field.id}"
-              :val_type="field.field_type" :value="(entry.data.metadata[cls.unique_id()] || {})[field.id]" wrapper="div">
-            </brisa-inline-editor>
+          <div class="row m-2" v-for="field in cls.config().fields">
+            <div class="col-12 col-md-3 col-lg-2 p-2">{{field.title}}</div>
+            <div class="col-12 col-md-9 col-lg-10 p-2 rounded" style="background-color: #f4f4f4; xheight: 100%;">
+              <brisa-inline-editor :name="field.title" :updated="UpdatedAttr" :update_ref="{cls: cls.unique_id(), field: field.id}"
+                :val_type="field.field_type" :value="(entry.data.metadata[cls.unique_id()] || {})[field.id]" wrapper="div">
+              </brisa-inline-editor>
+            </div>
           </div>
-        </div>
-      </div>
         </div>
       </div>
       <div v-if="sel_tab && sel_tab.type == 'model'">
