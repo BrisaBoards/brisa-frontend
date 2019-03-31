@@ -5,7 +5,8 @@
     <div :key="entry.data.id" :data-entryid="idx" :ref="'card' + entry.data.id" @mousedown="StartMove" @touchstart="StartMove"
         class="mb-1 mr-2" v-if="entry.data.id != pid" v-for="(entry, idx) in view.entries"
         :style="EntryPos(entry.data.id) + ' width: 200px; position: absolute;'">
-      <brisa-entry-card :api_ctx="pid + '-_whiteboard'" @delete="OnDelete(entry, idx)" :color.sync="card_bg" :entry="entry" :select="onSelect" :selected.sync="selected_entry">
+      <brisa-entry-card :highlight="view.highlight == entry.data.id" :api_ctx="pid + '-_whiteboard'" @delete="OnDelete(entry, idx)" :color.sync="card_bg" :entry="entry"
+          :select="onSelect" :selected.sync="selected_entry">
       </brisa-entry-card>
     </div>
   </div>
@@ -50,6 +51,7 @@
         }.bind(this));
       },
       onSelect: function(entry, ignore_move) {
+        if (this.view.highlight == entry.data.id) this.view.highlight = null;
         if (this.move && !ignore_move) return;
         this.selected_entry = this.selected_entry == entry.data.id ? null : entry.data.id;
       },

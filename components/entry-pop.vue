@@ -28,55 +28,68 @@
       </div>
 
       <div class="row ml-0 mr-0 mb-2  p-2" style="background-color: rgba(200,225,255,0.3);">
-        <div class="col-12 col-lg-4 xtext-muted">
+        <div class="col-12 col-lg-12 xtext-muted">
           <div>
-            <small><span v-if="entry_info.creator">By {{entry_info.creator}}</span> <span v-if="entry_info.stamp">on {{entry_info.stamp}}</span></small>
-            <button @click="ToggleWatch" class="btn btn-xs btn-link">{{entry.data.watchers.indexOf(Brisa.user.uid) != -1 ? "Stop Watching" : "Watch this card" }}</button>
+            <small>
+              <span v-if="entry_info.creator">By {{entry_info.creator}}</span>
+              <span v-if="entry_info.stamp">on {{entry_info.stamp}}</span>
+            </small>
+            <small class="text-muted float-right">
+              <button @click="ToggleWatch" class="btn btn-xs btn-link">{{entry.data.watchers.indexOf(Brisa.user.uid) != -1 ? "Stop Watching" : "Watch this card" }}</button>
+              &nbsp; #{{entry.data.id}}
+            </small>
           </div>
-          <div>
-            <button @click="expand_assign = !expand_assign" class="btn btn-xs btn-link">
-              <span v-if="entry.data.assignees.length == 0">Unassigned</span>
-              <span v-else>Assigned: <span v-for="uid in entry.data.assignees" class="xbg-light ml-1 mr-1">{{ucache[uid] || uid}} </span></span>
-            </button>
-            <div v-if="expand_assign">
-            <div @click="Assign(u.uid, entry.data.assignees.indexOf(u.uid) != -1 ? false : true, idx)" v-for="(u,idx) in assign_list"
-              :class="entry.data.assignees.indexOf(u.uid) != -1 ? 'bg-primary text-light' : 'bg-light text-dark'"
-              style="cursor: pointer; font-size: 75%; display: inline-block" class="mr-1 p-2">
-              {{u.user}}
+          <div style="vertical-align: top;">
+            <div style="vertical-align: top; display: inline-block;">
+            <button @click="expand_assign = !expand_assign" style="vertical-align: top;" class="btn btn-xs btn-link nofocus">
+              <small v-if="entry.data.assignees.length == 0">Unassigned</small>
+              <span v-else><small>Assigned:</small><br/>
+              <span v-for="uid in entry.data.assignees" class="xbg-light ml-1 mr-1">{{ucache[uid] || uid}} </span></span>
+            </button><br/>
+            <div v-if="expand_assign" style="display: inline-block">
+              <div @click="Assign(u.uid, entry.data.assignees.indexOf(u.uid) != -1 ? false : true, idx)" v-for="(u,idx) in assign_list"
+                :class="entry.data.assignees.indexOf(u.uid) != -1 ? 'bg-primary text-light' : 'bg-light text-dark'"
+                style="cursor: pointer; font-size: 75%; display: inline-block" class="mr-1 p-2">
+                {{u.user}}
+              </div>
             </div>
             </div>
-            <div>
-            </div>
-          </div>
+            <brisa-inline-editor style="vertical-align: top; display: inline-block; padding: 3px; font-size: 80%;" name="Due Date" :updated="UpdatedAttr" update_ref="due_at" val_type="datetime" :value="entry.data.due_at" :show_title="true" wrapper="div">
+            </brisa-inline-editor>
+            <brisa-inline-editor key="due_at" style="vertical-align: top; display: inline-block; padding: 3px; font-size: 80%;" name="Start Date" :updated="UpdatedAttr" update_ref="start_at" val_type="datetime" :value="entry.data.start_at" :show_title="true" wrapper="div">
+            </brisa-inline-editor>
+            <brisa-inline-editor key="completed_at" style="vertical-align: top; display: inline-block; padding: 3px; font-size: 80%;" name="Completed" :updated="UpdatedAttr" update_ref="completed_at" val_type="datetime" :value="entry.data.completed_at" :show_title="true" wrapper="div">
+            </brisa-inline-editor>
+            <brisa-inline-editor style="vertical-align: top; display: inline-block; padding: 3px; font-size: 80%;" name="Time Estimate" :updated="UpdatedAttr" update_ref="time_est" val_type="timer" :value="entry.data.time_est" :show_title="true" wrapper="div">
+            </brisa-inline-editor>
+
+            <!-- Tags -->
+            <div v-if="tags" class="xcol-12 xcol-lg-4 " style="display: inline-block; border-radius: 20px;">
+              <div class="p-2 rounded bg-light" @click="tag_popup = !tag_popup" style="cursor: pointer; display: inline-block">
+                <small>Labels</small><br/>
+                <div @click.stop v-if="tag_popup" class="bg-light rounded border p-2" style="min-width: 200px; border: 1px solid #888; position: absolute;">
+                  <div style="font-size: 80%; font-weight: bold" class="text-muted mb-1">Labels</div>
+                  <div @click="tag.selected ? RemoveTag(tag.tag) : AddTag(tag.tag)" v-for="tag in tags.labels" :class="tag.selected ? 'bg-primary text-light' : 'bg-light text-primary'"
+                      class="m-1 pl-2" style="padding: 3px; cursor: pointer; border-radius: 8px;">
+                    <small>{{tag.tag}}</small>
+                  </div>
+      
+                  <div style="font-size: 80%; font-weight: bold;" class="text-muted mt-2 mb-1">Other Tags</div>
+                  <div v-for="tag in tags.tags" class="border-primary bg-primary text-light m-1 pl-1 pr-1" style="border-radius: 8px;">
+                    <small>{{tag}}<a @click="RemoveTag(tag)" style="border-radius: 5px;"> &nbsp;<span class="fas fa-times-circle xtext-danger"></span></a></small>
+                  </div>
+                  <div>
+                    <input @keypress.enter="AddTag()" ref="new_tag" class="form-control form-control-sm" placeholder="Add tag" style="display: inline-block; width: 125px;">
+                  </div>
+                </div>
+                <span v-if="tag.selected" v-for="tag in tags.labels" class="m-1 border-primary bg-light text-primary"
+                    style="padding: 2px; border-radius: 8px;">
+                  <small>{{tag.tag}}</small>
+                </span>
+              </div>
+            </div> <!-- Tags -->
+          </div> <!-- Card fields -->
         </div>
-
-        <!-- Tags -->
-        <div v-if="tags" class="col-12 col-lg-4 " style="display: inline-block; border-radius: 20px;">
-          <div class="p-2 rounded bg-light" @click="tag_popup = !tag_popup" style="cursor: pointer; display: inline-block">
-            <small>Labels</small><br/>
-          <span v-if="tag.selected" v-for="tag in tags.labels" class="m-1 border-primary bg-light text-primary"
-              style="padding: 2px; border-radius: 8px;">
-            <small>{{tag.tag}}</small>
-          </span>
-          </div>
-
-          <div v-if="tag_popup" class="bg-light rounded border p-2" style="min-width: 200px; border: 1px solid #888; position: absolute;">
-            <div style="font-size: 80%; font-weight: bold" class="text-muted mb-1">Labels</div>
-            <div @click="tag.selected ? RemoveTag(tag.tag) : AddTag(tag.tag)" v-for="tag in tags.labels" :class="tag.selected ? 'bg-primary text-light' : 'bg-light text-primary'"
-                class="m-1 pl-2" style="padding: 3px; cursor: pointer; border-radius: 8px;">
-              <small>{{tag.tag}}</small>
-            </div>
-
-            <div style="font-size: 80%; font-weight: bold;" class="text-muted mt-2 mb-1">Other Tags</div>
-            <div v-for="tag in tags.tags" class="border-primary bg-primary text-light m-1 pl-1 pr-1" style="border-radius: 8px;">
-              <small>{{tag}}<a @click="RemoveTag(tag)" style="border-radius: 5px;"> &nbsp;<span class="fas fa-times-circle xtext-danger"></span></a></small>
-            </div>
-            <div>
-              <input @keypress.enter="AddTag()" ref="new_tag" class="form-control form-control-sm" placeholder="Add tag" style="display: inline-block; width: 125px;">
-            </div>
-          </div>
-        </div>
-
       </div>
 
       <div class="p-1" style="background-color: rgba(0,0,0,0.02);">
@@ -263,13 +276,16 @@
       },
       UpdatedAttr: function(new_value, up_ref) {
         if (up_ref.cls) {
+          var changes = [];
           if (this.entry.data.metadata[up_ref.cls] === undefined)
-            this.entry.data.metadata[up_ref.cls] = {};
-          this.entry.data.metadata[up_ref.cls][up_ref.field] = new_value;
-          this.entry.update();
+            //this.entry.data.metadata[up_ref.cls] = {};
+            changes.push(['set', 'metadata.' + up_ref.cls, {}]);
+          //this.entry.data.metadata[up_ref.cls][up_ref.field] = new_value;
+          //this.entry.update();
+          changes.push(['set', 'metadata.' + up_ref.cls + '.' + up_ref.field, new_value]);
+          return this.entry.partial(changes);
         } else {
-          this.entry[up_ref](new_value);
-          this.entry.update();
+          return this.entry.partial([['set', up_ref, new_value]]);
         }
       },
       AddTag: function(new_tag) {

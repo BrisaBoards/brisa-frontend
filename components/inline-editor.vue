@@ -1,10 +1,17 @@
 <template>
   <div :style="'height: 100%; ' + (noOverflow ? 'white-space: nowrap; overflow: hidden; text-overflow: ellipsis;' : '')">
+    <small v-if="show_title">{{name}}</small>
     <div style="width: 100%;" class="" @click.stop="StartEdit()" v-if="!do_edit">
       <slot>
       <component :is="wrapper || 'span'">
         <span v-if="value == '' || value == null" class="text-muted">
-          Add {{name}}
+          Add<span v-if="!show_title"> {{name}}</span>
+        </span>
+        <span v-else-if="val_type == 'datetime'">
+          {{new Date(value).toLocaleString()}}
+        </span>
+        <span v-else-if="val_type == 'timer'">
+          {{showEstimate(value)}}
         </span>
         <span v-else-if="val_type == 'int' || val_type == 'text' || val_type == 'markdown'"
           v-html="noOverflow ? value : fmtText(value)"
@@ -23,8 +30,9 @@
         <div class="p-2 rounded text-light" style="background-color: rgba(255,75,75,0.7); position: absolute; transform: translateY(-75%);" v-if="value_changed">
           Warning: {{name}} changed since editing!
         </div>
-      <input ref="editor" v-if="val_type == 'int' || val_type == 'string'" @keydown.tab.prevent="$refs.done.focus()" v-model="edit_val"
-          @keyup="checkKeyCode" style="xheight: 2em;" class="form-control p-2 border border-secondary xform-control-sm bg-light">
+      <input ref="editor" v-if="val_type == 'int' || val_type == 'string' || val_type == 'datetime' || val_type == 'timer'"
+          @keydown.tab.prevent="$refs.done.focus()" v-model="edit_val"
+          @keyup="checkKeyCode" style="height: auto;" class="form-control p-1 border border-secondary bg-light">
       <div v-else-if="val_type == 'text' || val_type=='markdown'">
         <textarea ref="editor" @keydown.tab.prevent="$refs.done.focus()" @keyup.esc="CancelEdit()" @input="resizeTextarea"
             class="form-control border border-secondary p-2 bg-light" style="min-height: 50px;" v-model="edit_val"></textarea>
@@ -40,6 +48,7 @@
       </div>
       </div>
       <div class="bg-secondary p-2 border border-dark rounded" style="z-index: 5; position: absolute; transform: translateX(15%);">
+        <div v-if="error" class="text-danger">{{error}}</div>
         <button @click="DoneEditing" ref="done" style="margin-bottom: 0px;" class="btn btn-sm btn-outline-success mr-2"><i class="fa fa-check"></i></button>
         <button @click="CancelEdit" style="" class="btn btn-sm btn-outline-danger"><i class="fa fa-times"></i></button>
       </div>
@@ -52,12 +61,28 @@
   export default Vue.extend({
     props: [
       'val_type', 'disp_value', 'value', 'wrapper', 'update_ref', 'updated', 'name', 'enum_list',
-      'keyed_value', "noOverflow", 'isOpen'
+      'keyed_value', "noOverflow", 'isOpen', 'show_title'
     ],
     data: function() {
-      return {value_changed: false, do_edit: this.isOpen, edit_val: this.keyed_value || this.value };
+      return {error: null, value_changed: false, do_edit: this.isOpen, edit_val: this.keyed_value || this.value,
+          est_regex: /^(([0-9]*)h)? *(([0-9]*)m?)?$/ };
     },
     methods: {
+      showEstimate: function(est_mins) {
+        if (est_mins == null || est_mins == 0) return '';
+        let hours = Number.parseInt(est_mins / 60);
+        let mins = est_mins - 60 * hours;
+        return (hours == 0 ? '' : hours + "h ") + mins + "m";
+      },
+      parseEstimate: function(estimate_string) {
+        if (estimate_string == '') return 0;
+        var parsed = this.est_regex.exec(estimate_string);
+        if (parsed) {
+          return (parsed[2] || 0) * 60 + (Number.parseInt(parsed[4]) || 0);
+        }
+
+        return null;
+      },
       fmtText: function(str) {
         return Brisa.formatText(str);
       },
@@ -73,14 +98,49 @@
         this.$emit('done-editing');
       },
       DoneEditing: function() {
-        this.do_edit = false;
-        this.updated(this.edit_val, this.update_ref);
-        this.$emit('done-editing');
+        var value = null;
+        if (this.val_type == 'datetime') {
+          if (this.edit_val == '') {
+            value = null;
+          } else {
+            var date = Brisa.datetime.parse(this.edit_val);
+            if (date == null || isNaN(date)) {
+              this.error = "Invalid Date"; return;
+            }
+            value = date.toISOString();
+          }
+        } else if (this.val_type == 'timer') {
+          value = this.parseEstimate(this.edit_val);
+          if (value == null) { this.error = "Invalid time value. Example: 5h 4m"; return }
+          if (value == 0) value = null;
+        } else {
+          value = this.edit_val;
+        }
+        var promise = this.updated(value, this.update_ref);
+        this.error = null;
+        if (promise) {
+          promise.then((err) => {
+            this.do_edit = false;
+            this.$emit('done-editing');
+          }).catch((err) => {
+            this.error = err.json && err.json.error ? err.json.error : 'Unknown error updating.';
+            this.$emit('edit-error', {ref: this.update_ref, err: err});
+          });
+        } else {
+          this.do_edit = false;
+          this.$emit('done-editing');
+        }
       },
       StartEdit: function() {
         this.value_changed = false;
         this.do_edit = true;
-        this.edit_val = this.keyed_value || this.value;
+        if (this.val_type == 'datetime') {
+          this.edit_val = this.value == '' || this.value == null ? '' : new Date(Date.parse(this.value)).toLocaleString();
+        } else if (this.val_type == 'timer') {
+          this.edit_val = this.showEstimate(this.value);
+        } else {
+          this.edit_val = this.keyed_value || this.value;
+        }
         this.$nextTick(function() {this.$refs.editor.focus()}.bind(this));
         if (this.val_type == 'text' || this.val_type == 'markdown')
           this.$nextTick(function() { this.resizeTextarea() }.bind(this));
@@ -97,6 +157,7 @@
       },
     },
     mounted: function() {
+      this.error = null;
       if (this.do_edit) {
         this.$nextTick(function() {
           //this.$refs.editor.focus()

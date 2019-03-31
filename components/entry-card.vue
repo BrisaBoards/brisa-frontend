@@ -1,5 +1,5 @@
 <template>
-  <brisa-card bg_class="bg-light" :color="color" :opacity="opacity"
+  <brisa-card bg_class="bg-light" :color="highlight ? 'rgba(215,235,255,0.90)' : color" :opacity="opacity"
     :style="'margin-top: ' + (margin || '10px')">
     <div @click="onClick" style="cursor: pointer;" @mouseover="hovering = true" @mouseout="hovering = false"
         :class="wrapper || 'card-body pl-3 pt-3 pr-3 pb-1'">
@@ -16,7 +16,7 @@
             <span class="fa fa-2x fa-caret-down"></span>
           </div>
           <slot name="title">
-            <div class="card-title text-info noselect" >{{entry.data.title}}</div>
+            <div :style="highlight ? 'font-weight: bold;' : ''" class="card-title text-info noselect">{{entry.data.title}}</div>
           </slot>
         </div>
       </brisa-popup>
@@ -43,7 +43,7 @@
   export default Vue.extend({
     props: [
       'entry', 'selected', 'hide_desc', 'select', 'margin',  'wrapper',
-      'color', 'opacity', 'api_ctx'
+      'color', 'opacity', 'api_ctx', 'highlight'
     ],
     data: function() {
       return {Brisa: Brisa, hovering: false};

@@ -32,7 +32,7 @@
       'note'
     ],
     data: function() {
-      return {entry: null, users: {}};
+      return {entry_id: null, entry: null, users: {}};
     },
     methods: {
       onDelete: function() {
@@ -51,8 +51,8 @@
         var ctx = this.getCtx();
         if (ctx) {
           Brisa.cache.get('Entry', ctx[0], false).then(function(r) {
-            Brisa.OpenCtx(r, ctx[1]);
-          });
+            Brisa.OpenCtx(r, ctx[1], this.entry_id);
+          }.bind(this));
           this.$emit('selected');
         } else if (this.entry) {
           Brisa.OpenCtx(this.entry);
@@ -77,6 +77,7 @@
     created: function() {
       var ent_id;
       if (ent_id = this.note.data.parent.match(/entry:(\d+)/)) {
+        this.entry_id = ent_id[1];
         Brisa.cache.get('Entry', ent_id[1], false).then(function(ent) {
           this.entry = ent;
         }.bind(this));

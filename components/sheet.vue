@@ -30,7 +30,7 @@
 
       <draggable tag="tbody" @end="UpdateOrder" v-model="entries"
         handle=".sheet-handle">
-        <tr :key="entry + '_' + idx"
+        <tr :style="entry == view.highlight ? 'background-color: rgba(200,220,255,0.93);' : ''" :key="entry + '_' + idx"
           v-if="entry_dict[entry] != undefined && entry_dict[entry].data.id != pid" v-for="(entry, idx) in entries"
           style="padding: 0px; margin: 0px;">
           <td style="height: 100%; border: 1px solid #eee;">
@@ -165,6 +165,7 @@
         }
       },
       onToggle: function(v) {
+        if (v == this.view.highlight) this.view.highlight = null;
         if (this.select_idx == v) {
           this.selected[this.select_idx] = false;
           this.select_idx = null;

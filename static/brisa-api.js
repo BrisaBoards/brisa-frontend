@@ -1,5 +1,5 @@
 // Brisa javascript client library, Version Brisa0.
-// Auto-generated on 2019-02-20
+// Auto-generated on 2019-03-27
 
 var BrisaAPI = {
   _include: {}
@@ -81,6 +81,11 @@ BrisaAPI.Entry.create = function(data) {
 BrisaAPI.Entry.update = function(id, data) {
   var args = { id: id, data: data };
   return BrisaAPI.SendRequest('Entry:update', args, BrisaAPI.Entry, false);
+};
+
+BrisaAPI.Entry.partial = function(id, actions) {
+  var args = { id: id, actions: actions };
+  return BrisaAPI.SendRequest('Entry:partial', args, BrisaAPI.Entry, false);
 };
 
 BrisaAPI.Entry.assign = function(id, uid, assign, ctx, is_role) {
@@ -366,6 +371,11 @@ BrisaAPI.Entry.prototype.find = function() {
 BrisaAPI.Entry.prototype.update = function() {
   var args = { id: this.data.id, data: this.data }
   return BrisaAPI.SendRequest('Entry:update', args, null, false, this);
+};
+
+BrisaAPI.Entry.prototype.partial = function(actions) {
+  var args = { id: this.data.id, actions: actions }
+  return BrisaAPI.SendRequest('Entry:partial', args, null, false, this);
 };
 
 BrisaAPI.Entry.prototype.assign = function(uid, assign, ctx, is_role) {

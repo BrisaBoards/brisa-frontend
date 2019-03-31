@@ -13,50 +13,50 @@
       <draggable :key="'drag_group'" group="drag_groups" handle=".group-mv-target" draggable=".drag-group" ref="draggable-group"
           @end="UpdateGroups" v-model="lane.groups" style="display: inline-block; padding-right: 25px;"
           >
-      <brisa-card :key="group.unique_id" xv-if="group.lane_id == lane.unique_id" class="ml-2 mt-3 drag-group" :opacity="0.85" color="white"
-          style="position: relative; white-space: normal; vertical-align: top; width: 300px; border: 0; display: inline-block"
-          v-for="(group,idx) in lane.groups">
-        <div class="text-dark p-2 mb-1">
-          <i key="drag" class="fa fa-bars group-mv-target pt-2 float-right text-dark" style="font-size: 120%; opacity: 0.4"></i>
-          <brisa-inline-editor name="Title" :update_ref="group" :updated="UpdateGroupName" :value="group.title" val_type="string"
-              class="m-0 p-2 rounded" wrapper="span" style="background-color: rgba(255,255,255,0.3);">
-            <span style="font-size: 125%;">{{group.title}}</span>
-          </brisa-inline-editor>
-        </div>
-
-        <div key="empty-group" v-if="sorted_groups[group.unique_id].length == 0" class="">
-          <button key="del" @click="RemoveGroup(lane, idx, group.unique_id)" class="float-right m-3 btn btn-outline-warning btn-sm">
-            Remove
-          </button>
-        </div>
-        <draggable :key="'drag' + group.unique_id" ref="draggable" style="padding-bottom: 30px;"
-            handle=".kblist-target" @add="UpdateEntry"
-            @end="UpdateGroups" v-model="sorted_groups[group.unique_id]"
-            tag="brisa-drag-cont" :component-data="{on: {}, props: {'cont_id': group.unique_id}}"
-            group="kb-cards">
-          <div :key="ent + '_' + idx" class="kblist-target m-0 mt-1" :data-group="group.unique_id" :data-ent="ent" style="position: relative;"
-              v-if="entry_dict[ent]" v-for="(ent, idx) in sorted_groups[group.unique_id]">
-            <brisa-entry-card :api_ctx="entry.id() + '-_kanban'" class="kanban-card" @delete="OnDelete(entry_dict[ent], idx, group.unique_id)"
-                wrapper="card-body-sm"
-                :select="onSelect" margin="1px" :selected.sync="selected_entry" :hide_desc="true" :entry="entry_dict[ent]">
-              <span slot="title">{{entry_dict[ent] ? entry_dict[ent].title() : 'No title for ' + ent}}</span>
-            </brisa-entry-card>
+        <brisa-card :key="group.unique_id" class="ml-2 mt-3 drag-group" :opacity="0.85" color="white"
+            style="position: relative; white-space: normal; vertical-align: top; width: 300px; border: 0; display: inline-block"
+            v-for="(group,idx) in lane.groups">
+          <div class="text-dark p-2 mb-1">
+            <i key="drag" class="fa fa-bars group-mv-target pt-2 float-right text-dark" style="font-size: 120%; opacity: 0.4"></i>
+            <brisa-inline-editor name="Title" :update_ref="group" :updated="UpdateGroupName" :value="group.title" val_type="string"
+                class="m-0 p-2 rounded" wrapper="span" style="background-color: rgba(255,255,255,0.3);">
+              <span style="font-size: 125%;">{{group.title}}</span>
+            </brisa-inline-editor>
           </div>
-        </draggable>
-        
-        <div>
-        <button @click="ShowAddCard(group.unique_id)" v-if="!show_add[group.unique_id]" class="btn btn-sm btn-secondary text-primary" style="width: 100%;"><i class="fa fa-plus"></i> Add</button>
-        <input :ref="'add-input-' + group.unique_id" style="font-size: 100%; padding: 20px;" @keyup.esc="ShowAddCard(group.unique_id, true)"
-            @keyup.enter="AddCard(group.unique_id)" v-if="show_add[group.unique_id]"
-            class="form-control form-control-sm bg-light" v-model="show_add[group.unique_id].title" placeholder="Title">
-        </div>
-      </brisa-card>
-      
+  
+          <div key="empty-group" v-if="sorted_groups[group.unique_id].length == 0" class="">
+            <button key="del" @click="RemoveGroup(lane, idx, group.unique_id)" class="float-right m-3 btn btn-outline-warning btn-sm">
+              Remove
+            </button>
+          </div>
+          <draggable :key="'drag' + group.unique_id" ref="draggable" style="padding-bottom: 30px;"
+              handle=".kblist-target" @add="UpdateEntry"
+              @end="UpdateGroups" v-model="sorted_groups[group.unique_id]"
+              tag="brisa-drag-cont" :component-data="{on: {}, props: {'cont_id': group.unique_id}}"
+              group="kb-cards">
+            <div :key="ent + '_' + idx" class="kblist-target m-0 mt-1" :data-group="group.unique_id" :data-ent="ent" style="position: relative;"
+                v-if="entry_dict[ent]" v-for="(ent, idx) in sorted_groups[group.unique_id]">
+              <brisa-entry-card :api_ctx="entry.id() + '-_kanban'" class="kanban-card" @delete="OnDelete(entry_dict[ent], idx, group.unique_id)"
+                  wrapper="card-body-sm" :highlight="my_view.highlight == ent"
+                  :select="onSelect" margin="1px" :selected.sync="selected_entry" :hide_desc="true" :entry="entry_dict[ent]">
+                <span slot="title">{{entry_dict[ent] ? entry_dict[ent].title() : 'No title for ' + ent}}</span>
+              </brisa-entry-card>
+            </div>
+          </draggable>
+          
+          <div>
+          <button @click="ShowAddCard(group.unique_id)" v-if="!show_add[group.unique_id]" class="btn btn-sm btn-secondary text-primary" style="width: 100%;"><i class="fa fa-plus"></i> Add</button>
+          <input :ref="'add-input-' + group.unique_id" style="font-size: 100%; padding: 20px;" @keyup.esc="ShowAddCard(group.unique_id, true)"
+              @keyup.enter="AddCard(group.unique_id)" v-if="show_add[group.unique_id]"
+              class="form-control form-control-sm bg-light" v-model="show_add[group.unique_id].title" placeholder="Title">
+          </div>
+        </brisa-card>
       </draggable>
+
       <brisa-card slot="footer" key="new" :opacity="0.7" class="ml-2 mt-3" style="vertical-align: top; display: inline-block">
         <div style="padding: 10px; text-align: center;">
           <a @click.prevent="ShowAddGroup(lane.unique_id)" href="#" v-if="add_group != lane.unique_id">
-            <i class="fa fa-plus"></i> <small>Card Group</small>
+            <i class="fa fa-plus"></i> <small>Column</small>
           </a>
           <div v-else>
           <input :ref="'new_group_' + lane.unique_id" class="form-control form-control-sm"
@@ -89,6 +89,7 @@
     data: function() {
       var p = this.view.parent;
       return {
+        my_view: this.view,
         pid: p.data.id,
         entry: p,
         add_group: false, new_group: '',
@@ -192,6 +193,7 @@
       },
       onSelect: function(entry) {
         this.selected_entry = this.selected_entry == entry.data.id ? false : entry.data.id;
+        if (this.view.highlight == entry.data.id) this.view.highlight = null;
         var disabled = this.selected_entry ? true : false;
         for (var i in this.$refs.draggable) {
           var d = this.$refs.draggable[i];

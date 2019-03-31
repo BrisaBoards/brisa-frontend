@@ -1,12 +1,14 @@
 import Vue from 'vue';
 import brisa_main_component from './components/main.vue';
 import BrisaMessager from './lib/messager.js';
+import BrisaDateTime from './lib/datetime.js';
 import BrisaCache from './lib/cache.js';
 
 export default function() {
   var Brisa = new function() { return {}; };
   Brisa.brisa_first_run = false;
   Brisa.views = [];
+  Brisa.datetime = BrisaDateTime;
   Brisa.group_views = {};
   // Real-time handlers
   Brisa.ActionCable = require('actioncable');
@@ -209,6 +211,8 @@ export default function() {
       group_name: group ? group.data.name : 'Personal',
       parent: parent,
       entries: entries,
+      highlight: null,
+      selected: null,
     };
     this.views.push(view);
     if (this.group_views[group_id] === undefined) this.group_views[group_id] = [];
@@ -222,7 +226,7 @@ export default function() {
     var view = this.AddView(entry.title(), 'brisa-entry-view', {tags: [], classes: []}, entry, []);
     view.ctx_str = entry.data.id;
   };
-  Brisa.OpenView = function(parent, uitype) {
+  Brisa.OpenView = function(parent, uitype, highlight) {
     var md = parent.data.metadata;
     var group_id = parent.data.group_id;
     var cls_md = md[uitype.cls];
@@ -230,21 +234,23 @@ export default function() {
       var view = this.AddView(parent.title(), uitype.cmp,
           {tags: cls_md.tags || [], classes: cls_md.classes || []},
           parent, r);
+      view.highlight = highlight;
       view.ctx_str = parent.data.id + ':' + uitype.cls;
     }.bind(this));    
   };
-  Brisa.OpenCtx = function(entry, board) {
+  Brisa.OpenCtx = function(entry, board, highlight) {
     var uitype = null;
     var ctx = board ? entry.data.id + ':' + board : entry.data.id;
     for (var uit of Brisa.ui_types) { if (uit.cls == board) uitype = uit; }
       for (var view of (Brisa.group_views[entry.group_id()] || [])) {
         if (view.ctx_str == ctx) {
+          if (highlight) Vue.set(view, 'highlight', highlight);
           Brisa.current_view = view;
           return;
         }
       }
       if (uitype) {
-        Brisa.OpenView(entry, uitype);
+        Brisa.OpenView(entry, uitype, highlight);
       } else {
         Brisa.OpenCard(entry);
       }
