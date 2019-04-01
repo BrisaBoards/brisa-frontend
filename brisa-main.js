@@ -51,6 +51,7 @@ export default function() {
     console.log("Initialize IDB backend");
     BrisaAPI._brisa_idb = new BrisaIDB('organizer-demo');
   }
+  Brisa.update = {stamp: null, updated: false, message: null, required: false};
   Brisa.results = [];
   Brisa.login_error = null;
   Brisa.user = {
@@ -100,6 +101,15 @@ export default function() {
       Brisa.messager.onMessage(data);
     } else if (data.m == 'cmt') {
       Brisa.messager.onMessage(data);
+    } else if (data.m == 'sysup') {
+      if (Brisa.update.stamp == null) {
+        Brisa.update.stamp = data.s;
+      } else if (Brisa.update.stamp != data.s) {
+        Brisa.update.stamp = data.s;
+        Brisa.update.updated = true;
+        Brisa.update.message = data.message;
+        Brisa.update.required = data.required;
+      }
     } else if (data.m == 'notify') {
       if (data.a == 'new') {
         BrisaAPI.Notification.find(data.id).then(function(r) {

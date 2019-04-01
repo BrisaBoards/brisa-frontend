@@ -15,8 +15,15 @@
           </slot>
         </div>
         <div class="pl-2 pb-2" style="white-space: nowrap">
-      <div class="p-1 text-info " style="opacity: 0.75; display: inline-block" v-if="entry.data.assignees.indexOf(Brisa.user.uid) != -1">
+
+      <div class="p-1 text-light bg-success" style="border-radius: 5px; opacity: 0.75; display: inline-block" v-if="entry.data.completed_at">
+        <i class="fa fa-check"></i>
+      </div>
+      <div class="p-1 text-info" style="height: 100%; opacity: 0.75; display: inline-block" v-if="entry.data.assignees.indexOf(Brisa.user.uid) != -1">
         <i class="fa fa-circle"></i>
+      </div>
+      <div class="p-1" style="vertical-align: center; line-height: 0.8rem; font-size: 85%; opacity: 0.75; display: inline-block" v-if="entry.data.due_at">
+        <small>Due<br/>{{new Date(entry.data.due_at).toLocaleDateString()}}</small>
       </div>
 
           <div class="p-1 noselect text-primary xfloat-right" style="display: inline-block; opacity: 0.6" v-if="entry.comment_count() > 0">

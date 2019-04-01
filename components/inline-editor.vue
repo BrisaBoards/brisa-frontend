@@ -50,7 +50,8 @@
       <div class="bg-secondary p-2 border border-dark rounded" style="z-index: 5; position: absolute; transform: translateX(15%);">
         <div v-if="error" class="text-danger">{{error}}</div>
         <button @click="DoneEditing" ref="done" style="margin-bottom: 0px;" class="btn btn-sm btn-outline-success mr-2"><i class="fa fa-check"></i></button>
-        <button @click="CancelEdit" style="" class="btn btn-sm btn-outline-danger"><i class="fa fa-times"></i></button>
+        <button @click="CancelEdit" style="" class="btn btn-sm btn-outline-danger mr-2"><i class="fa fa-times"></i></button>
+        <button @click="SetToNow" v-if="val_type == 'datetime'" style="" class="btn btn-sm btn-outline-info"><i key="t" class="far fa-calendar-check"></i></button>
       </div>
     </component>
   </div>
@@ -68,6 +69,10 @@
           est_regex: /^(([0-9]*)h)? *(([0-9]*)m?)?$/ };
     },
     methods: {
+      SetToNow: function() {
+        this.edit_val = new Date().toLocaleString();
+        this.$refs.editor.focus();
+      },
       showEstimate: function(est_mins) {
         if (est_mins == null || est_mins == 0) return '';
         let hours = Number.parseInt(est_mins / 60);

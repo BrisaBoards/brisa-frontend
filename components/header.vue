@@ -39,7 +39,17 @@
       </div>
     </div>
   </div>
-
+  <div v-if="Brisa.update.updated" class="text-light text-center">
+    <div class="p-2" style="background-color: rgba(0,0,0,0.4); display: inline-block; text-align: left;">
+      <strong>Brisa Updated!</strong>
+      <small>{{Brisa.update.message}}</small>
+      <small v-if="Brisa.update.required"><br/>This update is required. Please save your changes and reload as soon as possible.</small>
+    </div>
+    <div style="display: inline-block; vertical-align: top;" class="pl-3">
+      <button @click="DoReload" class="btn btn-sm btn-primary">Reload</button>
+      <button @click="Brisa.update.updated = false" v-if="!Brisa.update.required" class="btn btn-sm btn-primary">Dismiss</button>
+    </div>
+  </div>
     <div v-if="Brisa.brisa_first_run" class="clearfix text-dark p-3 pl-5" style="background-color: rgba(255,255,255,1); border-radius: 0 0 20px 20px;">
       <div class="float-right" style="text-align: right;">
       </div>
@@ -63,6 +73,9 @@
       return {view: Brisa.current_view, Brisa: Brisa, show_notify: false};
     },
     methods: {
+      DoReload: function() {
+        location.reload();
+      },
       LoadDemo: function(path) {
         $.get(path).then(function(r) {
           console.log("Load", r);

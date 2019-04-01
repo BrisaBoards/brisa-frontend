@@ -25,8 +25,14 @@
         <p class="" v-html="fmtText(entry.description())"></p>
       </div>
     <div>
-      <div class="p-1 text-info " style="opacity: 0.75; display: inline-block" v-if="entry.data.assignees.indexOf(Brisa.user.uid) != -1">
+      <div class="p-1 text-light bg-success" style="border-radius: 5px; opacity: 0.75; display: inline-block" v-if="entry.data.completed_at">
+        <i class="fa fa-check"></i>
+      </div>
+      <div class="p-1 text-info" style="height: 100%; opacity: 0.75; display: inline-block" v-if="entry.data.assignees.indexOf(Brisa.user.uid) != -1">
         <i class="fa fa-circle"></i>
+      </div>
+      <div class="p-1" style="line-height: 0.8rem; font-size: 85%; opacity: 0.75; display: inline-block" v-if="entry.data.due_at">
+        <small>Due<br/>{{new Date(entry.data.due_at).toLocaleDateString()}}</small>
       </div>
       <button v-for="uit in Brisa.ui_types" @mousedown.stop @touchstart.stop @click.stop="Brisa.OpenCtx(entry, uit.cls)"
           v-if="entry.metadata()[uit.cls]" class="btn btn-round-xs btn-outline-primary mt-2 ml-1 mb-2"><i :class="'fa ' + uit.icon"></i> {{uit.name}}</button>
