@@ -130,8 +130,15 @@
         <h4>Comments</h4>
         <div v-if="comments !== null">
           <div class="xtable-active mb- p-" v-for="comment in comments">
-            <div class="mb-1 p-1 pl-2" v-html="Brisa.formatText(comment.comment())"></div>
-            <div class="mb-3 p-1 pl-2 pr-2 table-active text-" style="border-radius: 8px; display: inline-block; font-size: 80%">by {{comment.data.user}} <span class="text-muted">on {{comment.stamp}}</span></div>
+            <div v-show="false" class="mb-1 p-1 pl-2" v-html="Brisa.formatText(comment.comment())"></div>
+            <brisa-inline-editor class="mb-1 p-1 pl-2" :show_delete="true" :disabled="comment.data.user_uid != Brisa.user.uid" name="Comment"
+                :updated="UpdatedComment" :update_ref="comment" val_type="text" :value="comment.comment()">
+            </brisa-inline-editor>
+            <div class="mb-3 p-1 pl-2 pr-2 table-active"
+                style="border-radius: 8px; display: inline-block; font-size: 80%">
+              <span :style="comment.data.user_uid == Brisa.user.uid ? 'font-weight: bold':''">by {{comment.data.user}}</span>
+              <span class="text-muted">on {{comment.stamp}}</span>
+            </div>
           </div>
         </div>
 
@@ -273,6 +280,18 @@
         this.entry.destroy().then(function(r) {
           this.$emit('deleted');
         }.bind(this));
+      },
+      UpdatedComment: function(new_value, up_ref) {
+        if (new_value === null) {
+          return up_ref.destroy().then(() => {
+            for (let i in this.comments) {
+              let cmt = this.comments[i];
+              if (cmt.data.id == up_ref.data.id) this.comments.splice(i, 1);
+            }
+          });
+        }
+        up_ref.comment(new_value);
+        return up_ref.update();
       },
       UpdatedAttr: function(new_value, up_ref) {
         if (up_ref.cls) {

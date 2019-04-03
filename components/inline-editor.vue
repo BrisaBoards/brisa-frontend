@@ -1,7 +1,7 @@
 <template>
   <div :style="'height: 100%; ' + (noOverflow ? 'white-space: nowrap; overflow: hidden; text-overflow: ellipsis;' : '')">
     <small v-if="show_title">{{name}}</small>
-    <div style="width: 100%;" class="" @click.stop="StartEdit()" v-if="!do_edit">
+    <div :style="disabled ? '' : 'cursor: pointer'" style="width: 100%;" class="" @click.stop="StartEdit()" v-if="!do_edit">
       <slot>
       <component :is="wrapper || 'span'">
         <span v-if="value == '' || value == null" class="text-muted">
@@ -27,7 +27,8 @@
     </div>
     <component style="height: 100%; min-height: 50px;" :is="wrapper || 'div'" v-if="do_edit" class="xd-flex">
       <div class="flex-grow-1" style="height: 100%; position: relative;">
-        <div class="p-2 rounded text-light" style="background-color: rgba(255,75,75,0.7); position: absolute; transform: translateY(-75%);" v-if="value_changed">
+        <div class="p-2 rounded text-light" style="background-color: rgba(255,75,75,0.7); position: absolute; transform: translateY(-75%);"
+            v-if="value_changed && !is_updating">
           Warning: {{name}} changed since editing!
         </div>
       <input ref="editor" v-if="val_type == 'int' || val_type == 'string' || val_type == 'datetime' || val_type == 'timer'"
@@ -47,11 +48,20 @@
         <small>Need handler for {{val_type}}</small>
       </div>
       </div>
-      <div class="bg-secondary p-2 border border-dark rounded" style="z-index: 5; position: absolute; transform: translateX(15%);">
+      <div style="position: relative;">
+      <div class="bg-secondary p-2 border border-dark rounded" style="z-index: 5; position: absolute; left: 20px; xtransform: translateX(15%);">
         <div v-if="error" class="text-danger">{{error}}</div>
-        <button @click="DoneEditing" ref="done" style="margin-bottom: 0px;" class="btn btn-sm btn-outline-success mr-2"><i class="fa fa-check"></i></button>
-        <button @click="CancelEdit" style="" class="btn btn-sm btn-outline-danger mr-2"><i class="fa fa-times"></i></button>
+        <button @click="DoneEditing(false)" ref="done" style="margin-bottom: 0px;" class="btn btn-sm btn-outline-success mr-2"><i class="fa fa-check"></i></button>
+        <button @click="CancelEdit" style="" class="btn btn-sm btn-outline-warning mr-2"><i class="fa fa-times"></i></button>
         <button @click="SetToNow" v-if="val_type == 'datetime'" style="" class="btn btn-sm btn-outline-info"><i key="t" class="far fa-calendar-check"></i></button>
+        <button @click="confirm_delete = true" v-if="show_delete" style="" class="btn btn-sm btn-outline-danger"><i key="t" class="far fa-trash-alt"></i></button>
+
+        <div v-if="confirm_delete" class="m-1">
+          Delete {{name}}?<br/>
+          <button @click="confirm_delete = false" class="btn btn-sm btn-outline-success">No</i></button>
+          <button @click="DoneEditing(true)" class="btn btn-sm btn-outline-danger">Delete</i></button>
+        </div>
+      </div>
       </div>
     </component>
   </div>
@@ -62,11 +72,11 @@
   export default Vue.extend({
     props: [
       'val_type', 'disp_value', 'value', 'wrapper', 'update_ref', 'updated', 'name', 'enum_list',
-      'keyed_value', "noOverflow", 'isOpen', 'show_title'
+      'keyed_value', "noOverflow", 'isOpen', 'show_title', 'disabled', 'show_delete',
     ],
     data: function() {
       return {error: null, value_changed: false, do_edit: this.isOpen, edit_val: this.keyed_value || this.value,
-          est_regex: /^(([0-9]*)h)? *(([0-9]*)m?)?$/ };
+          est_regex: /^(([0-9]*)h)? *(([0-9]*)m?)?$/, is_updating: false, confirm_delete: false};
     },
     methods: {
       SetToNow: function() {
@@ -102,9 +112,12 @@
         this.do_edit = false;
         this.$emit('done-editing');
       },
-      DoneEditing: function() {
+      DoneEditing: function(deleted) {
         var value = null;
-        if (this.val_type == 'datetime') {
+        if (deleted) {
+          value = null;
+          console.log("Delete selected");
+        } else if (this.val_type == 'datetime') {
           if (this.edit_val == '') {
             value = null;
           } else {
@@ -124,12 +137,15 @@
         var promise = this.updated(value, this.update_ref);
         this.error = null;
         if (promise) {
+          this.is_updating = true;
           promise.then((err) => {
             this.do_edit = false;
             this.$emit('done-editing');
+            this.is_updated = false;
           }).catch((err) => {
             this.error = err.json && err.json.error ? err.json.error : 'Unknown error updating.';
             this.$emit('edit-error', {ref: this.update_ref, err: err});
+            this.is_updated = false;
           });
         } else {
           this.do_edit = false;
@@ -137,6 +153,7 @@
         }
       },
       StartEdit: function() {
+        if (this.disabled) return;
         this.value_changed = false;
         this.do_edit = true;
         if (this.val_type == 'datetime') {
