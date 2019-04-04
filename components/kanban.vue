@@ -30,7 +30,7 @@
             </button>
           </div>
           <draggable :key="'drag' + group.unique_id" ref="draggable" style="padding-bottom: 30px;"
-              handle=".kblist-target" @add="UpdateEntry"
+              :handle="Brisa.settings.size == 'sm' ? '.kbmove-target' : '.kblist-target'" @add="UpdateEntry"
               @end="UpdateGroups" v-model="sorted_groups[group.unique_id]"
               tag="brisa-drag-cont" :component-data="{on: {}, props: {'cont_id': group.unique_id}}"
               group="kb-cards">
@@ -39,7 +39,10 @@
               <brisa-entry-card :api_ctx="entry.id() + '-_kanban'" class="kanban-card" @delete="OnDelete(entry_dict[ent], idx, group.unique_id)"
                   wrapper="card-body-sm" :highlight="my_view.highlight == ent"
                   :select="onSelect" margin="1px" :selected.sync="selected_entry" :hide_desc="true" :entry="entry_dict[ent]">
-                <span slot="title">{{entry_dict[ent] ? entry_dict[ent].title() : 'No title for ' + ent}}</span>
+                <span slot="title">
+                  <span v-if="Brisa.settings.size == 'sm'" style="opacity: 0.5"><i class="fa fa-bars kbmove-target"></i> </span>
+                  {{entry_dict[ent] ? entry_dict[ent].title() : 'No title for ' + ent}}
+                </span>
               </brisa-entry-card>
             </div>
           </draggable>

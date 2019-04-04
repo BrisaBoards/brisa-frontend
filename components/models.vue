@@ -22,8 +22,7 @@
         <div class="container-fluid">
 
           <table class="table table-hover">
-          <tbody>
-          <!-- <draggable v-model="sel_model.config().fields" :options="{xhandle: '.drag-handle'}" @update="UpdateFields()"> -->
+          <draggable v-model="sel_model.config().fields" wrapper="tbody" :options="{xhandle: '.drag-handle'}" @update="UpdateFields()">
           <tr :key="field.unique_id" v-for="(field,idx) in sel_model.config().fields">
             <td><span style="font-weight: bold">
                 <brisa-inline-editor name="Title" :updated="UpdatedAttr" :update_ref="[idx, 'title']" val_type="string" :value="field.title"></brisa-inline-editor>
@@ -36,8 +35,7 @@
             </td>
             <td style="font-family: monospace">{{field.id}}</td>
           </tr>
-          <!-- </draggable> -->
-          </tbody>
+          </draggable>
           </table>
         </div>
         
@@ -100,7 +98,7 @@
         this.sel_model.update();
       },
       UpdateFields: function() {
-        
+        this.sel_model.update();
       },
     },
   });

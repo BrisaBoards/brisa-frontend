@@ -278,11 +278,12 @@ export default function() {
     string: 'Text, single line',
     text: 'Text, multi-line',
     markdown: 'Markdown Text, for simple formatting',
-    html: 'HTML, for a visual text editor',
+    //html: 'HTML, for a visual text editor',
     int: 'Integer',
     decimal: 'Decimal, for non-whole numbers',
     datetime: 'Date + Time',
-    listgroup: 'List Group, to create lists with more info within'
+    timer: 'Time (eg 5h 30m)',
+    //listgroup: 'List Group, to create lists with more info within'
   };
   Brisa.field_type_arr = [];
   for (var i in Brisa.field_types) Brisa.field_type_arr.push([i, Brisa.field_types[i]]);
