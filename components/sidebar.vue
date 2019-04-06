@@ -24,21 +24,27 @@
       </div>
     </div>
 
-    <div v-else key="sb" class="w-100 no-sb-y" style="height: 100%;">
-      <div v-if="!expanded" class="pt-2" style="width: 100%; text-align: center;">
+    <div v-else key="sb" class="w-100 no-sb-y m-0 p-0" style="height: 100%; xoverflow-y: auto;">
+      <div v-if="!expanded" class="pt-2 pb-2" style="width: 100%; text-align: center;">
         <img style="width: 50%; height: auto;" src="favicon.ico">
       </div>
-    <div :key="'group_' + group_idx" class="bg-transparent pt-4 w-100" style="xoverflow-x: hidden;" :class="expanded ? 'p-1 pl-1 pr-1' : 'p-0'"
+    <div :key="'group_' + group_idx" class="bg-transparent mt-1 w-100" style="xoverflow-x: hidden;" :class="expanded ? 'p-1 pl-1 pr-1' : 'p-0'"
         v-for="(group, group_idx) in Brisa.groups">
       <div v-if="expanded" @click="GroupSettings(group)" style="cursor: pointer;" class="xtext-light float-right p-1">
         <i class="fa fa-cog" style="opacity: 0.5"></i>
       </div>
-      <div key="grp-cont" class="mb-1 pl-1 pr-1" style="text-align: left; white-space: nowrap; xoverflow: hidden;">
-      <h4 v-if="!Brisa.group_views[group.data.id]" :style="expanded ? '' : 'font-size: 100%;'" @click="OpenDash(group.data.id)" style="cursor: pointer;" class="text-info text-of mb-0 noselect">{{group.data.name}}</h4>
-      <h4 v-else :style="expanded ? '' : 'font-size: 100%;'" class="mb-0 text-of text-info noselect">{{group.data.name}}</h4>
+      <div key="grp-cont" class="mb-0 xpl-1 xpr-1" style="text-align: left; white-space: nowrap; xoverflow: hidden;">
+      <h4 :style="expanded ? '' : 'font-size: 100%;'" @click="OpenDash(group.data.id)" style="cursor: pointer;"
+          :class="Brisa.current_view && Brisa.current_view.component == 'brisa-dashboard' && Brisa.current_view.group_id == group.data.id ? 'bg-primary text-light' : 'text-info'"
+          class="xtext-info text-of m-0 p-1 pt-1 noselect">
+        {{group.data.name}}
+      </h4>
       </div>
-      <div :key="idx + view.unique_id" @mouseover="onHover(view.unique_id, true)" @mouseout="onHover(view.unique_id, false)" @click="Brisa.current_view = view; $emit('toggle-menu')" :class="'p-1 w-100 ' + (Brisa.current_view == view ? 'bg-primary text-light' : '')"
-          style="position: relative; cursor: pointer; xoverflow: hidden;" :style="expanded ? 'xborder-radius: 18px;' : 'text-align: center;'" v-if="view" v-for="(view, idx) in Brisa.group_views[group.data.id]">
+      <div :key="idx + view.unique_id" @mouseover="onHover(view.unique_id, true)" @mouseout="onHover(view.unique_id, false)" @click="Brisa.current_view = view; $emit('toggle-menu')"
+          :class="'p-1 w-100 ' + (Brisa.current_view == view ? 'bg-primary text-light' : '')"
+          style="position: relative; cursor: pointer" :style="expanded ? '' : 'text-align: center;'"
+          v-if="view && view.component != 'brisa-dashboard'"
+          v-for="(view, idx) in Brisa.group_views[group.data.id]">
         <transition name="fade-fast">
         <div @click.stop v-if="!expanded && hover_view == view.unique_id"
             style="white-space: nowrap; text-align: left; cursor: default; z-index: 10000; top: 3px; left: 89%; position: absolute; max-width: 200px; overflow: hidden;"
@@ -47,10 +53,14 @@
           <button v-if="false" @click="" class="btn m-0 btn-sm p-2 pt-0 pb-0 btn-outline-success"><i class="fa fa-thumbtack"></i></button>
         </div>
         </transition>
-        <div class="" :style="expanded ? '' : 'xfont-size: 75%;'" style="xwhite-space: nowrap; xtext-align: left; display: inline-block; width: 100%; overflow: hidden;">
-          <div class="float-right" v-if="expanded"><button @click.stop="CloseView(group.data.id, idx)" style="font-size: 75%; border: 0px; box-shadow: 0 0 0" class="btn btn-xs p-1 m-0 btn-outline-danger"><i class="fa fa-times" style="opacity: 0.5"></i></button></div>
-          <span><i v-if="view.component == 'brisa-dashboard'" class="fa fa-th"></i>
-          <i :class="'fa ' + Brisa.ui_classes[view.component].icon" v-if="Brisa.ui_classes[view.component]"></i>
+        <div class="" :style="expanded ? '' : ''" style="display: inline-block; width: 100%; overflow: hidden;">
+          <div class="float-right" v-if="expanded"><button @click.stop="CloseView(group.data.id, idx)" style="font-size: 75%; border: 0px; box-shadow: 0 0 0"
+              class="btn btn-xs p-1 m-0 btn-outline-danger">
+            <i class="fa fa-times" style="opacity: 0.5"></i></button>
+          </div>
+          <span>
+            <i v-if="view.component == 'brisa-dashboard'" class="fa fa-th"></i>
+            <i :class="'fa ' + Brisa.ui_classes[view.component].icon" v-if="Brisa.ui_classes[view.component]"></i>
           </span>
           <br key="small_sep" v-if="!expanded" />
           <span :style="expanded ? '' : 'font-size: 80%'" style="white-space: nowrap; text-overflow: ellipsis;">{{view.title}}</span>
@@ -118,6 +128,13 @@
         this.group = group;
       },
       OpenDash: function(group_id) {
+        for (var view of Brisa.group_views[group_id] || []) {
+          if (view.component == 'brisa-dashboard') {
+            Brisa.current_view = view;
+            this.$emit('toggle-menu');
+            return;
+          }
+        }
         Brisa.AddView('Dashboard', 'brisa-dashboard', {tags: [], classes: []}, null, [], group_id);
         this.$emit('toggle-menu');
       },
