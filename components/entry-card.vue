@@ -25,13 +25,16 @@
         <p class="" v-html="fmtText(entry.description())"></p>
       </div>
     <div>
-      <div class="p-1 text-light bg-success" style="border-radius: 5px; opacity: 0.75; display: inline-block" v-if="entry.data.completed_at">
+      <div key="archived" class="p-1 text-light bg-warning" style="border-radius: 5px; opacity: 0.75; display: inline-block" v-if="entry.data.archived">
+        <i class="fa fa-archive"></i>
+      </div>
+      <div key="completed" class="p-1 text-light bg-success" style="border-radius: 5px; opacity: 0.75; display: inline-block" v-if="entry.data.completed_at">
         <i class="fa fa-check"></i>
       </div>
-      <div class="p-1 text-info" style="height: 100%; opacity: 0.75; display: inline-block" v-if="entry.data.assignees.indexOf(Brisa.user.uid) != -1">
+      <div key="assigned" class="p-1 text-info" style="height: 100%; opacity: 0.75; display: inline-block" v-if="entry.data.assignees.indexOf(Brisa.user.uid) != -1">
         <i class="fa fa-circle"></i>
       </div>
-      <div class="p-1" style="line-height: 0.8rem; font-size: 85%; opacity: 0.75; display: inline-block" v-if="entry.data.due_at">
+      <div key="due" class="p-1" style="line-height: 0.8rem; font-size: 85%; opacity: 0.75; display: inline-block" v-if="entry.data.due_at">
         <small>Due<br/>{{new Date(entry.data.due_at).toLocaleDateString()}}</small>
       </div>
       <button v-for="uit in Brisa.ui_types" @mousedown.stop @touchstart.stop @click.stop="Brisa.OpenCtx(entry, uit.cls)"

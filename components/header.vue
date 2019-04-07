@@ -39,15 +39,15 @@
       </div>
     </div>
   </div>
-  <div v-if="Brisa.update.updated" class="text-light text-center">
-    <div class="p-2" style="background-color: rgba(0,0,0,0.4); display: inline-block; text-align: left;">
-      <strong>Brisa Updated!</strong>
+  <div v-if="Brisa.update.updated" style="width: 500px; max-width: 100%; position: absolute; left: 50%; transform: translateX(-50%);" class="text-light text-center">
+    <div class="p-3 m-2" style="border-radius: 10px; font-size: 115%; background-color: rgba(0,0,0,0.6); display: inline-block; text-align: center;">
+      <strong>Brisa Updated!</strong><br/>
       <small>{{Brisa.update.message}}</small>
       <small v-if="Brisa.update.required"><br/>This update is required. Please save your changes and reload as soon as possible.</small>
-    </div>
-    <div style="display: inline-block; vertical-align: top;" class="pl-3">
-      <button @click="DoReload" class="btn btn-sm btn-primary">Reload</button>
-      <button @click="Brisa.update.updated = false" v-if="!Brisa.update.required" class="btn btn-sm btn-primary">Dismiss</button>
+      <div class="mt-2">
+      <button @click="DoReload" class="btn btn-sm btn-primary">Reload Now</button>
+      <button @click="Brisa.update.updated = false" v-if="!Brisa.update.required" class="btn btn-sm ml-3 btn-warning">Dismiss</button>
+      </div>
     </div>
   </div>
     <div v-if="Brisa.brisa_first_run" class="clearfix text-dark p-3 pl-5" style="background-color: rgba(255,255,255,1); border-radius: 0 0 20px 20px;">

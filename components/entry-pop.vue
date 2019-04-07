@@ -2,7 +2,7 @@
   <brisa-card opacity="0.98" bg_class="bg-light" :color="null" class="mb-1 mr-1 xnofocus" :style="'max-width: 100vw; xwidth: 100vw; xz-index: ' + (zindex ? zindex: 100)">
 
     <div v-if="!hide_icons" class="float-right">
-      <button class="btn btn-lg btn-outline-danger" style="border-radius: 0px;" @click.stop="confirm_delete = true">
+      <button class="btn btn-lg btn-outline-danger" style="border-radius: 0px;" @click.stop="confirm_delete = !confirm_delete">
         <i class="fa fa-1x fa-trash-alt"></i>
       </button>
       <button class="btn btn-lg btn-outline-primary ml-1" style="border-radius: 0px;" @click.stop="$emit('on-close')">
@@ -18,13 +18,17 @@
         </div>
       </div>
       <div v-if="confirm_delete" class="text-center bg-light rounded border p-2 text-danger" style="z-index: 1; position: absolute; max-width: 100%; width: 300px; right: 0px">
-        <h3>Delete Card?</h3>
+        <button class="btn btn-lg btn-outline-warning w-100" @click="UpdatedAttr(!entry.data.archived, 'archived')">
+          <i class="fa fa-archive"></i> {{entry.data.archived ? 'Unarchive' : 'Archive'}}
+        </button>
+        <hr/>
+        <h4>Delete Card?</h4>
         <p>
           Note: If the card includes a Kanban, Sheet, etc, the items within will 
           <strong>not</strong> be deleted.
         </p>
-        <button @click="confirm_delete = false" class="btn btn-outline-primary">Cancel</button>
-        <button @click="$emit('delete')" class="btn btn-danger">Yes, Delete</button>
+        <button @click="confirm_delete = false" class="btn btn-sm btn-outline-primary">Cancel</button>
+        <button @click="$emit('delete')" class="btn btn-sm btn-danger">Yes, Delete</button>
       </div>
 
       <div class="row ml-0 mr-0 mb-2  p-2" style="background-color: rgba(200,225,255,0.3);">

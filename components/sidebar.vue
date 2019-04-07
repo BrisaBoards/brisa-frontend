@@ -33,7 +33,7 @@
       <div v-if="expanded" @click="GroupSettings(group)" style="cursor: pointer;" class="xtext-light float-right p-1">
         <i class="fa fa-cog" style="opacity: 0.5"></i>
       </div>
-      <div key="grp-cont" class="mb-0 xpl-1 xpr-1" style="text-align: left; white-space: nowrap; xoverflow: hidden;">
+      <div key="grp-cont" class="mb-0 mt-2" style="text-align: left; white-space: nowrap; xoverflow: hidden;">
       <h4 :style="expanded ? '' : 'font-size: 100%;'" @click="OpenDash(group.data.id)" style="cursor: pointer;"
           :class="Brisa.current_view && Brisa.current_view.component == 'brisa-dashboard' && Brisa.current_view.group_id == group.data.id ? 'bg-primary text-light' : 'text-info'"
           class="xtext-info text-of m-0 p-1 pt-1 noselect">

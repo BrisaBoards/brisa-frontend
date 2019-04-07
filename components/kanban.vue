@@ -1,6 +1,10 @@
 <template>
   <div ref="kanban-main" class="" :style="'height: 100%; width: 100%; position: absolute; vertical-align: top; white-space: nowrap;'">
-
+    <div style="position: absolute; right: 10px; top: 10px;" class="xbg-light">
+      <div class="bg-light p-1" style="border-radius: 5px;">
+        <brisa-filter @update="UpdateFilter" :group_id="this.view.group_id"></brisa-filter>
+      </div>
+    </div>
     <div class="mb-3" v-for="(lane, lane_idx) in lanes()">
       <div v-if="lane.title">
         <div class="mt-2 pl-3 p-2" style="border-radius: 0 20px 20px 0; display: inline-block; background-color: rgba(255,255,255,0.90)">
@@ -35,7 +39,8 @@
               tag="brisa-drag-cont" :component-data="{on: {}, props: {'cont_id': group.unique_id}}"
               group="kb-cards">
             <div :key="ent + '_' + idx" class="kblist-target m-0 mt-1" :data-group="group.unique_id" :data-ent="ent" style="position: relative;"
-                v-if="entry_dict[ent]" v-for="(ent, idx) in sorted_groups[group.unique_id]">
+                v-if="entry_dict[ent] && (selected_entry == ent || filter_dict[ent])"
+                v-for="(ent, idx) in sorted_groups[group.unique_id]">
               <brisa-entry-card :api_ctx="entry.id() + '-_kanban'" class="kanban-card" @delete="OnDelete(entry_dict[ent], idx, group.unique_id)"
                   wrapper="card-body-sm" :highlight="my_view.highlight == ent"
                   :select="onSelect" margin="1px" :selected.sync="selected_entry" :hide_desc="true" :entry="entry_dict[ent]">
@@ -92,12 +97,14 @@
     data: function() {
       var p = this.view.parent;
       return {
+        show_filters: false,
         my_view: this.view,
         pid: p.data.id,
         entry: p,
         add_group: false, new_group: '',
         show_add: {},
         entry_dict: {},
+        filter_dict: {},
         selected_entry: null,
         sorted_groups: null,
         win_height: Brisa.settings.height,
@@ -242,6 +249,11 @@
               kb.sorted[g.unique_id].splice(ent_idx, 1);
           }
         }
+      },
+      UpdateFilter: function(new_filter) {
+        this.filter = new_filter;
+        Brisa.filter.init(this.view.entries, new_filter, this.filter_dict);
+        this.$forceUpdate();
       },
       lanes: function() {
         return this.entry.metadata()._kanban.lanes;

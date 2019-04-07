@@ -3,12 +3,14 @@ import brisa_main_component from './components/main.vue';
 import BrisaMessager from './lib/messager.js';
 import BrisaDateTime from './lib/datetime.js';
 import BrisaCache from './lib/cache.js';
+import BrisaFilter from './lib/filter.js';
 
 export default function() {
   var Brisa = new function() { return {}; };
   Brisa.brisa_first_run = false;
   Brisa.views = [];
   Brisa.datetime = BrisaDateTime;
+  Brisa.filter = BrisaFilter;
   Brisa.group_views = {};
   // Real-time handlers
   Brisa.ActionCable = require('actioncable');
