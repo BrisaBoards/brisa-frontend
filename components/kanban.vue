@@ -1,6 +1,6 @@
 <template>
   <div ref="kanban-main" class="" :style="'height: 100%; width: 100%; position: absolute; vertical-align: top; white-space: nowrap;'">
-    <div style="position: absolute; right: 10px; top: 10px;" class="xbg-light">
+    <div style="position: absolute; right: 10px; top: 10px; z-index: 5;" class="xbg-light">
       <div class="bg-light p-1" style="border-radius: 5px;">
         <brisa-filter @update="UpdateFilter" :group_id="this.view.group_id"></brisa-filter>
       </div>
