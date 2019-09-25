@@ -1,9 +1,9 @@
 <template>
   <div>
     <div class="clearfix">
-    <button @click="show_filters = !show_filters" class="float-right btn btn-round-sm btn-outline-primary nofocus"><i key="filter" class="fa fa-search"></i></button>
+    <button @click="show_filters = !show_filters" :class="(show_filters ? 'btn-primary ' : 'btn-outline-primary ') + (left ? '' : 'float-right')" class="btn btn-round-sm nofocus"><i key="filter" class="fa fa-search"></i></button>
     </div>
-    <div v-if="show_filters" class="p-1" style="max-width: 100%; width: 250px;">
+    <div v-if="show_filters" class="p-2 mt-1 rounded border-secondary" style="max-width: 100%; width: 250px;">
       <label>Card Status</label>
       <select @change="SendUpdate" v-model="status" class="form-control form-control-sm">
         <option value="active">Active</option>
@@ -18,14 +18,15 @@
       <div v-for="member in members" @click="SetOpt('assign', member.uid)" class="p-1" style="border-radius: 3px; cursor: pointer;"
           :class="assign == member.uid ? 'bg-primary text-light' : 'text-primary'">{{member.user}}</div>
 
-      <button @click="ClearFilter" class="btn btn-outline-default btn-sm w-100 mt-3 nofocus">Clear All</button>
+      <button @click="ClearFilter" class="btn btn-outline-default btn-sm w-100 mt-3 nofocus">Clear All</button><br/>
+      <button @click="show_filters = false" class="btn btn-outline-default btn-sm w-100 mt-1 nofocus">Done</button>
     </div>
   </div>
 </template>
 <script>
   import Vue from 'vue'
   export default Vue.extend({
-    props: ['group_id'],
+    props: ['group_id', 'left'],
     data: function() {
       return {
         show_filters: false,

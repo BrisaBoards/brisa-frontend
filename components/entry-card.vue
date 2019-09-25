@@ -21,7 +21,9 @@
         </div>
       </brisa-popup>
 
-      <div v-if="!hide_desc" class="card-bodyx text-muted entry-section" style="position: relative; max-height: 75px; cursor: pointer; overflow: hidden;'">
+      <div v-if="!hide_desc" class="card-bodyx text-muted entry-section"
+          style="position: relative; cursor: pointer; overflow: hidden;'"
+          :style="full_desc ? '' : 'max-height: 75px'">
         <p class="" v-html="fmtText(entry.description())"></p>
       </div>
     <div>
@@ -52,7 +54,7 @@
   export default Vue.extend({
     props: [
       'entry', 'selected', 'hide_desc', 'select', 'margin',  'wrapper',
-      'color', 'opacity', 'api_ctx', 'highlight'
+      'color', 'opacity', 'api_ctx', 'highlight', 'full_desc'
     ],
     data: function() {
       return {Brisa: Brisa, hovering: false};

@@ -3,13 +3,16 @@
       :style="'height: 100%; padding: 0px; width: 100%; position: absolute;'">
     <div style="padding-bottom: 2px;"></div>
 
+    <div key="filter" class="bg-light ml-2 mt-2" style="position: fixed; z-index: 5;">
+    <brisa-filter @update="UpdateFilter" :left="true" :group_id="this.view.group_id"></brisa-filter>
+    </div>
     <table class="table xtable-striped text-dark table-hover sheet-table" style="width: auto; background-color: rgba(255,255,255,0.95)">
       <thead class="xthead-light text-muted bg-light" style="font-weight: normal">
         <tr v-if="models.length > 0">
-          <th colspan="3" style="border: 1px solid #eee;"></th>
+          <th colspan="3" style="border: 1px solid #eee">
+          </th>
           <th style="text-align: center;border: 1px solid #eee;" v-if="model_dict[model]" :colspan="model_dict[model].config().fields.length" v-for="model in models">
             <div class="sheet-cell-cont" style="width: 200px;">{{model_dict[model].title()}}</div>
-            
           </th>
         </tr>
         <tr>
@@ -31,14 +34,13 @@
       <draggable tag="tbody" @end="UpdateOrder" v-model="entries"
         handle=".sheet-handle">
         <tr :style="entry == view.highlight ? 'background-color: rgba(200,220,255,0.93);' : ''" :key="entry + '_' + idx"
-          v-if="entry_dict[entry] != undefined && entry_dict[entry].data.id != pid" v-for="(entry, idx) in entries"
+          v-if="entry_dict[entry] != undefined && entry_dict[entry].data.id != pid && (select_idx == entry || filter_dict[entry])" v-for="(entry, idx) in entries"
           style="padding: 0px; margin: 0px;">
           <td style="height: 100%; border: 1px solid #eee;">
             <div class="xsheet-cell-cont" style="padding: 3px; height: 100%;">
               <span class="sheet-handle"><span class="fa fa-arrows-alt-v" style="color: #bbb; cursor: pointer;"></span></span>
-              &nbsp;
               <button @click="onToggle(entry)"
-                  :class="'btn btn-sheet ' + (select_idx == idx ? 'btn-primary' : 'btn-outline-primary')"
+                  :class="'btn btn-sheet nofocus ' + (select_idx == entry ? 'btn-primary' : 'btn-outline-primary')"
                   style="height: 100%; xborder-radius: 50px; xpadding: 3px;">
                 &nbsp;{{idx+1}}&nbsp;
               </button>
@@ -58,7 +60,7 @@
           <td style="height: 100%; border: 1px solid #ddd">
             <div v-if="!open_cells[idx + '_title']" @click="$set(open_cells, idx + '_title', true)" style="width: 200px">
               <div class="d-flex sheet-cell-cont" style="max-width: 100%;">
-                <div class="flex-grow-1 xsheet-cell-cont">
+                <div :style="entry_dict[entry].completed_at ? 'text-decoration: line-through;' : ''" class="flex-grow-1 xsheet-cell-cont">
                   {{entry_dict[entry].title()}}
                 </div>
                 <div class="">
@@ -66,13 +68,15 @@
                 </div>
               </div>
             </div>
-            <brisa-inline-editor v-else :isOpen="true" @done-editing="$set(open_cells, idx + '_title', false)" name="Title" :updated="UpdatedAttr" :update_ref="[entry_dict[entry], 'title']" val_type="string" :value="entry_dict[entry].title()"></brisa-inline-editor>
+            <brisa-inline-editor v-else key="editor" :allInline="true" :isOpen="true" @done-editing="$set(open_cells, idx + '_title', false)" name="Title" :updated="UpdatedAttr"
+                :update_ref="[entry_dict[entry], 'title']" val_type="string" :value="entry_dict[entry].title()">
+            </brisa-inline-editor>
           </td>
           <td style="height: 100%; border: 1px solid #ddd">
             <div v-if="!open_cells[idx + '_desc']" @click="$set(open_cells, idx + '_desc', true)" class="sheet-cell-cont" style="width: 200px">
               {{entry_dict[entry].description()}}
             </div>
-            <brisa-inline-editor v-else :isOpen="true" @done-editing="$set(open_cells, idx + '_desc', false)" name="Description" :updated="UpdatedAttr" val_type="text" :update_ref="[entry_dict[entry], 'description']" :value="entry_dict[entry].description()"></brisa-inline-editor>
+            <brisa-inline-editor v-else :allInline="true" :isOpen="true" @done-editing="$set(open_cells, idx + '_desc', false)" name="Description" :updated="UpdatedAttr" val_type="text" :update_ref="[entry_dict[entry], 'description']" :value="entry_dict[entry].description()"></brisa-inline-editor>
           </td>
           <template v-for="(model,m_idx) in models">
             <td v-if="entry_dict[entry].classes().indexOf(model) == -1" style="height: 100%; text-align: center" :colspan="(model_dict[model].config() || {fields: []}).fields.length">
@@ -85,7 +89,7 @@
                   @click="$set(open_cells, idx + ':' + model + ':' + field.id, true)" class="sheet-cell-cont" style="width: 200px">
                 {{((entry_dict[entry].metadata()[model] || {})[field.id]) || ''}}
               </div>
-              <brisa-inline-editor v-else :isOpen="true" @done-editing="$set(open_cells, idx + ':' + model + ':' + field.id, false)" name="field.name" :updated="UpdatedAttr"
+              <brisa-inline-editor v-else :allInline="true" :isOpen="true" @done-editing="$set(open_cells, idx + ':' + model + ':' + field.id, false)" name="field.name" :updated="UpdatedAttr"
                 :val_type="field.field_type" :update_ref="{ent: entry_dict[entry], cls: model, field: field.id}" :value="(entry_dict[entry].metadata()[model] || {})[field.id]">
               </brisa-inline-editor>
             </td>
@@ -127,6 +131,7 @@
         add_entry: false,
         new_entry: '',
         open_cells: {},
+        filter: null, filter_dict: {},
       };
     },
     methods: {
@@ -139,6 +144,11 @@
             this.entries.splice(cidx, 1);
           }
         }.bind(this));
+      },
+      UpdateFilter: function(new_filter) {
+        this.filter = new_filter;
+        Brisa.filter.init(this.view.entries, new_filter, this.filter_dict);
+        this.$forceUpdate();
       },
       onSelect: function(entry) {
         this.selected_entry = this.selected_entry == entry.data.id ? null : entry.data.id;
@@ -207,6 +217,8 @@
       RTUpdate: function(entry, event) {
         if ((entry.data || {}).id == this.view.parent.data.id) {
           this.InitEntries();
+        } else if (entry) {
+          this.$set(this.filter_dict, entry.data.id, Brisa.filter.filter_one(entry, this.filter));
         }
         if (event == 'add') {
           if (this.entries.indexOf(entry.data.id) != -1) return;

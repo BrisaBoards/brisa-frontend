@@ -1,5 +1,6 @@
 import Vue from 'vue';
 import BrisaMain from './brisa-main.js';
+import BrisaAddCard from './components/add-card.vue';
 import BrisaBadgeList from './components/badge-list.vue';
 import BrisaCard from './components/card.vue';
 import BrisaDraggableContainer from './components/draggable-container.vue';
@@ -14,16 +15,21 @@ import BrisaNotification from './components/notification.vue';
 import BrisaPopup from './components/popup.vue';
 import BrisaSettings from './components/settings.vue';
 import BrisaHeader from './components/header.vue';
-import BrisaSheet from './components/sheet.vue';
 import BrisaDashboard from './components/dashboard.vue';
-import BrisaKanban from './components/kanban.vue';
-import BrisaWhiteboard from './components/whiteboard.vue';
+import BrisaStats from './components/stats.vue';
 import BrisaLogin from './components/login.vue';
 import LayoutSm from './components/layout-sm.vue';
 import LayoutLg from './components/layout-lg.vue';
 import Draggable from 'vuedraggable';
 
+import BrisaSheet from './components/sheet.vue';
+import BrisaKanban from './components/kanban.vue';
+import BrisaWhiteboard from './components/whiteboard.vue';
+import BrisaOutline from './components/outline.vue';
+import BrisaOutlineSection from './components/outline-section.vue';
+
 Vue.component('draggable', Draggable);
+Vue.component('brisa-add-card', BrisaAddCard);
 Vue.component('brisa-card', BrisaCard);
 Vue.component('brisa-entry-card', BrisaEntryCard);
 Vue.component('brisa-entry-card-horiz', BrisaEntryCardHoriz);
@@ -38,13 +44,17 @@ Vue.component('brisa-notification', BrisaNotification);
 Vue.component('brisa-popup', BrisaPopup);
 Vue.component('brisa-settings', BrisaSettings);
 Vue.component('brisa-header', BrisaHeader);
-Vue.component('brisa-sheet', BrisaSheet);
 Vue.component('brisa-dashboard', BrisaDashboard);
-Vue.component('brisa-whiteboard', BrisaWhiteboard);
-Vue.component('brisa-kanban', BrisaKanban);
+Vue.component('brisa-stats', BrisaStats);
 Vue.component('brisa-login', BrisaLogin);
 Vue.component('layout-sm', LayoutSm);
 Vue.component('layout-lg', LayoutLg);
+
+Vue.component('brisa-sheet', BrisaSheet);
+Vue.component('brisa-whiteboard', BrisaWhiteboard);
+Vue.component('brisa-kanban', BrisaKanban);
+Vue.component('brisa-outline', BrisaOutline);
+Vue.component('brisa-outline-section', BrisaOutlineSection);
 
 BrisaAPI.api = process.env.USE_API;
 console.log("Init - API", process.env.USE_API, BrisaAPI.api);

@@ -8,6 +8,24 @@ body:fullscreen {
   background-color: transparent;
 }
 
+::-webkit-scrollbar{cursor: pointer;width:7px}::-webkit-scrollbar-track{background:#75b2ff80;border-radius:7px}::-webkit-scrollbar-thumb{background:#2766ef;border-radius:18px}
+
+.simple-shadow {
+  box-shadow: 1px 1px 5px 2px rgba(128,128,128,0.5);
+}
+.hover-hider .hover-show {
+  opacity: 0.2;
+  filter: grayscale(0.5);
+}
+.hover-hider .hover-op50 {
+  opacity: 0.5;
+}
+.hover-hider:hover .hover-show {
+  filter: grayscale(0);
+  transition: all .5s ease;
+  opacity: 1;
+}
+
 .nofocus {
   -webkit-box-shadow: none !important;
   box-shadow: none !important;
@@ -64,6 +82,7 @@ body:fullscreen {
 
 .btn {
   text-transform: none;
+  padding: 0.3rem 0.5rem;
 }
 
 .flex-grow-1 {
@@ -178,7 +197,6 @@ body:fullscreen {
     border: 1px solid #ccc;
     padding: 0px;
     white-space: nowrap;
-    overflow: hidden;
     text-overflow: ellipsis;
     height: 1px;
   }

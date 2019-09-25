@@ -11,11 +11,17 @@
       <div style="display: inline-block; position: relative;">
       <button @click="show_notify = !show_notify" style="position: relative; padding-left: 12px; padding-right: 12px;" class="btn btn-outline-primary btn-round-sm text-light nofocus">
         <i class="fa fa-user"></i>
+        <div v-if="Brisa.ws_connected == false" class="text-light pl-1 pr-1" :class="Brisa.ws_connected ? 'bg-success' : 'bg-danger'"
+            style="border-radius: 10px; padding: 2px; position: absolute; left: 0; right: 0px; bottom: 0px; height: 4px;">
+        </div>
         <div v-if="Brisa.notify.unread_count > 0" class="bg-info text-light pl-1 pr-1" style="text-align: center; font-weight: bold; font-size: 80%; border-radius: 10px; padding: 2px; position: absolute; right: 0px; top: 0px;">
           {{ Brisa.notify.unread_count }}
         </div>
       </button>
       <div v-show="show_notify" class="xrounded border border-primary bg-light text-dark" style="z-index: 10; overflow: hidden; white-space: normal; width: 350px; max-width: 100vw; border-radius: 5px; position: absolute; right: 0;">
+        <div v-if="Brisa.ws_connected == false" class="text-center border rounded border-danger text-danger p-1 m-1">
+          <strong>Unable to connect to Brisa.</strong>
+        </div>
         <div class="p-1 clearfix">
           <div class="float-right">
           <button key="logout" @click="show_notify = false; Brisa.logout()" class="btn xbtn-sm btn-outline-primary p-1 pl-2 pr-2"><i class="fa fa-sign-out-alt"></i></button>

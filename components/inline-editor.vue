@@ -1,5 +1,5 @@
 <template>
-  <div :style="'height: 100%; ' + (noOverflow ? 'white-space: nowrap; overflow: hidden; text-overflow: ellipsis;' : '')">
+  <div :style="(allInline ? '' : 'height: 100%; ') + (noOverflow ? 'white-space: nowrap; overflow: hidden; text-overflow: ellipsis;' : '')">
     <small v-if="show_title">{{name}}</small>
     <div :style="disabled ? '' : 'cursor: pointer'" style="width: 100%;" class="" @click.stop="StartEdit()" v-if="!do_edit">
       <slot>
@@ -49,7 +49,7 @@
       </div>
       </div>
       <div style="position: relative;">
-      <div class="bg-secondary p-2 border border-dark rounded" style="z-index: 5; position: absolute; left: 20px; xtransform: translateX(15%);">
+      <div class="bg-secondary p-2 border border-secondary rounded" :style="allInline ? 'position: relative' : 'position: absolute'" style="z-index: 5; left: 20px; display: inline-block;">
         <div v-if="error" class="text-danger">{{error}}</div>
         <button @click="DoneEditing(false)" ref="done" style="margin-bottom: 0px;" class="btn btn-sm btn-outline-success mr-2"><i class="fa fa-check"></i></button>
         <button @click="CancelEdit" style="" class="btn btn-sm btn-outline-warning mr-2"><i class="fa fa-times"></i></button>
@@ -73,6 +73,7 @@
     props: [
       'val_type', 'disp_value', 'value', 'wrapper', 'update_ref', 'updated', 'name', 'enum_list',
       'keyed_value', "noOverflow", 'isOpen', 'show_title', 'disabled', 'show_delete',
+      'allInline',
     ],
     data: function() {
       return {error: null, value_changed: false, do_edit: this.isOpen, edit_val: this.keyed_value || this.value,

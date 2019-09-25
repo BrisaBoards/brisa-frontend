@@ -1,12 +1,13 @@
 <template>
   <div ref="kanban-main" class="" :style="'height: 100%; width: 100%; position: absolute; vertical-align: top; white-space: nowrap;'">
-    <div style="position: absolute; right: 10px; top: 10px; z-index: 5;" class="xbg-light">
-      <div class="bg-light p-1" style="border-radius: 5px;">
-        <brisa-filter @update="UpdateFilter" :group_id="this.view.group_id"></brisa-filter>
+    <div style="margin-top: 10px; position: fixed; right: 25px; z-index: 5;" class="float-right">
+      <div class="bg-light p-1" style="border-radius: 5px; vertical-align: top;">
+        <brisa-stats @select="(id) => { /*console.log('sel', id);*/ selected_entry = id }" style="display: inline-block; vertical-align: top;" :groups="GetStatsGroups" :group_id="this.view.group_id"></brisa-stats>
+        <brisa-filter style="display: inline-block; vertical-align: top;" @update="UpdateFilter" :group_id="this.view.group_id"></brisa-filter>
       </div>
     </div>
     <div class="mb-3" v-for="(lane, lane_idx) in lanes()">
-      <div v-if="lane.title">
+      <div>
         <div class="mt-2 pl-3 p-2" style="border-radius: 0 20px 20px 0; display: inline-block; background-color: rgba(255,255,255,0.90)">
           <brisa-inline-editor name="Lane Title" :update_ref="lane" :updated="UpdateLaneName" :value="lane.title" val_type="string"
               class="m-0 text-dark mr-1" style="font-size: 115%;" wrapper="span">
@@ -161,9 +162,9 @@
         this.entry.update().then(() => { this.$set(this, 'sorted_groups', this.entry.data.metadata._kanban.sorted) });
         this.new_group = '';
         this.add_group = false;
-        if (this.kanban.groups.length == 1) {
-          this.InitGroups();
-        }
+        //if (kanban.groups.length == 1) {
+        //  this.InitGroups();
+        //}
       },
       ShowAddCard: function(group, hideit) {
         this.$set(this.show_add, group, hideit ? false : {title: ''});
@@ -182,6 +183,7 @@
             this.sorted_groups[group].push(r.data.id);
           //this.entry.metadata()._kanban.sorted[group].push(r.data.id);
           this.$set(this, 'sorted_groups', this.entry.data.metadata._kanban.sorted);
+          this.$set(this.filter_dict, r.data.id, true);
           this.$forceUpdate();
         }.bind(this));
       },
@@ -250,6 +252,9 @@
           }
         }
       },
+      GetStatsGroups: function() {
+        return Brisa.stats.KanbanGroups(this.view.parent, this.view.entries);
+      },
       UpdateFilter: function(new_filter) {
         this.filter = new_filter;
         Brisa.filter.init(this.view.entries, new_filter, this.filter_dict);
@@ -266,6 +271,8 @@
           this.entry = this.view.parent;
           this.sorted_groups = this.entry.metadata()._kanban.sorted;
           return;
+        } else if (entry) {
+          this.$set(this.filter_dict, entry.data.id, Brisa.filter.filter_one(entry, this.filter));
         }
         if (event == 'add') {
           var to_group = entry.metadata()._kanbans[this.pid].group;

@@ -1,6 +1,7 @@
 <template>
-  <div class="xtext-light w-100 no-sb-y" style="display: inline-block; z-index: 5000; position: relative; height: 100%; width: 100%;">
-    <div class="bg-light" style="z-index: -1; opacity: 0.95;  position: absolute; top:0; width: 100%; height: 100%;"></div>
+  <div class="w-100 no-sb-y" style="z-index: 5000; position: relative; overflow-y: scroll; height: 100%;">
+    <div class="w-100" style="position: relative; min-height: 100%;">
+    <div class="bg-light" style="z-index: -1; opacity: 0.95;  position: absolute; top:0; width: 100%; bottom: 0;"></div>
     <div key="sb-group" v-if="group && expanded" class="m-3">
       <div @click="group = null" style="cursor: pointer; font-size: 150%;" class="p-2 float-right text-info"><i class="fa fa-times"></i></div>
       <h3>Group: {{ group.data.name }}</h3>
@@ -36,7 +37,7 @@
       <div key="grp-cont" class="mb-0 mt-2" style="text-align: left; white-space: nowrap; xoverflow: hidden;">
       <h4 :style="expanded ? '' : 'font-size: 100%;'" @click="OpenDash(group.data.id)" style="cursor: pointer;"
           :class="Brisa.current_view && Brisa.current_view.component == 'brisa-dashboard' && Brisa.current_view.group_id == group.data.id ? 'bg-primary text-light' : 'text-info'"
-          class="xtext-info text-of m-0 p-1 pt-1 noselect">
+          class="xtext-info text-of m-0 p-1 pt-2 pb-2 noselect">
         {{group.data.name}}
       </h4>
       </div>
@@ -47,15 +48,19 @@
           v-for="(view, idx) in Brisa.group_views[group.data.id]">
         <transition name="fade-fast">
         <div @click.stop v-if="!expanded && hover_view == view.unique_id"
-            style="white-space: nowrap; text-align: left; cursor: default; z-index: 10000; top: 3px; left: 89%; position: absolute; max-width: 200px; overflow: hidden;"
-            class="border p-1 rounded border-secondary bg-light text-dark">
-          <button @click="CloseView(group.data.id, idx)" class="btn m-0 btn-sm btn-outline-danger p-2"><i class="fa fa-times" style="opacity: 0.5"></i></button>
+            style="white-space: nowrap; text-align: left; cursor: default; z-index: 10000; bottom: 100%; right: 0; xleft: 89%; position: absolute;
+              max-width: 200px; overflow: hidden; transform: translateY(50%);"
+            class="border p-0 rounded xborder-secondary bg-light text-dark">
+          <button @click="CloseView(group.data.id, idx)" class="btn m-0 btn-sm btn-outline-danger p-1">
+            <i class="fa fa-times" style="opacity: 0.6"></i>
+          </button>
           <button v-if="false" @click="" class="btn m-0 btn-sm p-2 pt-0 pb-0 btn-outline-success"><i class="fa fa-thumbtack"></i></button>
         </div>
         </transition>
         <div class="" :style="expanded ? '' : ''" style="display: inline-block; width: 100%; overflow: hidden;">
-          <div class="float-right" v-if="expanded"><button @click.stop="CloseView(group.data.id, idx)" style="font-size: 75%; border: 0px; box-shadow: 0 0 0"
-              class="btn btn-xs p-1 m-0 btn-outline-danger">
+          <div class="float-right" v-if="expanded">
+            <button @click.stop="CloseView(group.data.id, idx)" style="font-size: 75%; border: 0px; box-shadow: 0 0 0"
+                class="btn btn-xs p-1 m-0 btn-outline-danger">
             <i class="fa fa-times" style="opacity: 0.5"></i></button>
           </div>
           <span>
@@ -81,6 +86,7 @@
     <button @click="new_group = true" class="btn btn-sm btn-link w-100"><i class="fa fa-plus"></i> &nbsp;New Group</button>
     <button @click="Brisa.toggleFullScreen" class="btn btn-sm btn-link w-100"><i class="fa fa-arrows-alt"></i> Fullscreen</button>
     <button @click="Brisa.logout" class="btn btn-link btn-sm w-100"><i class="fa fa-user"></i>&nbsp; Log Out {{ Brisa.user.alias }}</button>
+    </div>
     </div>
     </div>
   </div>

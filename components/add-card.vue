@@ -1,5 +1,5 @@
 <template>
-  <div class="input-group" style="width: auto; height: 45px;">
+  <div class="input-group" :style="{height: height ? height : '45px'}" style="width: auto;">
     <button @click="ToggleInput" class="btn btn-round btn-primary input-group-prepend" :style="expand_add ? 'border-radius: 20px 0 0 20px;' : ''"
         style="margin: 0; height: 100%;">
       <i class="fa fa-plus"></i>
@@ -13,7 +13,7 @@
   import Vue from 'vue'
   export default Vue.extend({
     props: [
-      'Brisa', 'onSubmit'
+      'Brisa', 'onSubmit', 'height'
     ],
     data: function() {
       return {expand_add: false};

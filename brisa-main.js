@@ -4,6 +4,7 @@ import BrisaMessager from './lib/messager.js';
 import BrisaDateTime from './lib/datetime.js';
 import BrisaCache from './lib/cache.js';
 import BrisaFilter from './lib/filter.js';
+import BrisaStats from './lib/stats.js';
 
 export default function() {
   var Brisa = new function() { return {}; };
@@ -11,9 +12,11 @@ export default function() {
   Brisa.views = [];
   Brisa.datetime = BrisaDateTime;
   Brisa.filter = BrisaFilter;
+  Brisa.stats = BrisaStats;
   Brisa.group_views = {};
   // Real-time handlers
   Brisa.ActionCable = require('actioncable');
+  Brisa.ws_connected = false;
   Brisa.EventBus = new Vue();
   Brisa.notify = {
     update: function() {
@@ -22,6 +25,13 @@ export default function() {
         if (!msg.data.is_read) new_cnt++;
       }
       Brisa.notify.unread_count = new_cnt;
+      if (Brisa.notify.unread_count > 0) {
+        document.title = "(" + Brisa.notify.unread_count + ") " + Brisa.title;
+        document.getElementById('favicon').href = '/favicon-dot.ico';
+      } else {
+        document.title = Brisa.title;
+        document.getElementById('favicon').href = '/favicon.ico';
+      }
     },
     unread_count: 0,
     messages: [],
@@ -81,8 +91,12 @@ export default function() {
     if (Brisa.cable_mon_ping) Brisa.cable_mon_ping();
     Brisa.last_ws_ping = new Date();
   };
+  Brisa.wsClose = function() {
+    Brisa.ws_connected = false;
+  };
   Brisa.wsOpen = function() {
     var last_ping = Brisa.last_ws_ping;
+    Brisa.ws_connected = true;
     if (Brisa.cable_mon_open) Brisa.cable_mon_open();
     if (last_ping == undefined) {
       return
@@ -152,8 +166,10 @@ export default function() {
     var mon = Brisa.cable.connection.monitor;
     Brisa.cable_mon_ping = mon.recordPing.bind(mon);
     Brisa.cable_mon_open = mon.recordConnect.bind(mon);
+    Brisa.cable_mon_close= mon.recordDisconnect.bind(mon);
     mon.recordPing = Brisa.wsPing ;
     mon.recordConnect = Brisa.wsOpen;
+    mon.recordDisconnect = Brisa.wsClose;
     Brisa.cable.subscriptions.create({channel: 'UserChannel'}, {received: Brisa.onMessage });
   };
 
@@ -272,9 +288,11 @@ export default function() {
     'brisa-kanban': {cmp: 'brisa-kanban', name: 'Kanban', cls: '_kanban', method: 'OpenKanban', icon: 'fa-columns'},
     'brisa-whiteboard': {cmp: 'brisa-whiteboard', name: 'Whiteboard', cls: '_whiteboard', method: 'OpenWhiteboard', icon: 'fa-chalkboard'},
     'brisa-sheet': {cmp: 'brisa-sheet', name: 'Sheet', cls: '_sheet', method: 'OpenSheet', icon: 'fa-table'},
+    'brisa-outline': {cmp: 'brisa-outline', name: 'Outline', cls: '_outline', method: 'OpenSheet', icon: 'fa-stream'},
   };
   Brisa.ui_types = [
     Brisa.ui_classes['brisa-kanban'], Brisa.ui_classes['brisa-whiteboard'], Brisa.ui_classes['brisa-sheet'],
+    Brisa.ui_classes['brisa-outline'],
   ];
   Brisa.field_types = {
     string: 'Text, single line',
@@ -304,7 +322,7 @@ export default function() {
     if (length === undefined || length === null) length = 8;
     var ret = '', chars = this.uid_chars;
     for (var i = 0; i < length; i++) ret += chars[((Math.random() * chars.length) | 0)];
-    if (name) ret += "-" + name.toLowerCase().replace(/[^a-z]/g, '_').slice(0, 7).replace(/_*$/, '');
+    if (name) ret += "-" + name.toLowerCase().replace(/[^a-z0-9]/g, '_').slice(0, 7).replace(/_*$/, '');
     return ret;
   }
   Brisa.model = function(uid) {
@@ -454,6 +472,7 @@ export default function() {
   };
   $(window).on('resize', function(r) { Brisa.onResize() });
   $(document).ready(function() {
+    Brisa.title = document.title;
     Brisa.onResize();
     BrisaAPI._include.auth_token = localStorage.getItem('brisa-token');
     Brisa.theme = {data: {setting: { image: 'backgrounds/breeze.jpg'}}};
